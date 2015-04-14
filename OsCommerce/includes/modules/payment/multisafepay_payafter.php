@@ -25,6 +25,7 @@ class multisafepay_payafter {
      */
 
     function multisafepay_payafter($order_id = -1) {
+        global $order;
         $this->code = 'multisafepay_payafter';
         $this->title = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_TEXT_TITLE);
         $this->description = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_TEXT_TITLE);
@@ -336,31 +337,30 @@ class multisafepay_payafter {
      * Check whether this payment module is available
      */
 
+   
+    
     function update_status() {
-        // always disable
-        //$this->enabled = false;
-        if ($this->enabled && ((int) MODULE_PAYMENT_MSP_BANKTRANS_ZONE > 0)) {
-            $check_flag = false;
-            $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MSP_BANKTRANS_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
+        global $order;
 
+        if (($this->enabled == true) && ((int) MODULE_PAYMENT_MSP_PAYAFTER_ZONE > 0)) {
+            $check_flag = false;
+            $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_MSP_PAYAFTER_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
             while ($check = tep_db_fetch_array($check_query)) {
                 if ($check['zone_id'] < 1) {
                     $check_flag = true;
                     break;
-                } else if ($check['zone_id'] == $GLOBALS['order']->billing['zone_id']) {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
             }
 
-            if (!$check_flag) {
+            if ($check_flag == false) {
                 $this->enabled = false;
             }
         }
-        /* if(MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_NORMAL_CHECKOUT != 'True'){
-          $this->enabled = false;
-          } */
     }
+    
 
     // ---- select payment module ----
 

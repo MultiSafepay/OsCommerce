@@ -36,6 +36,7 @@ if (!class_exists('multisafepay')) {
          */
 
         function multisafepay($order_id = -1) {
+            global $order;
             $this->code = 'multisafepay';
             $this->title = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_TEXT_TITLE);
             $this->description = MODULE_PAYMENT_MULTISAFEPAY_TEXT_DESCRIPTION;
@@ -43,9 +44,8 @@ if (!class_exists('multisafepay')) {
             $this->sort_order = MODULE_PAYMENT_MULTISAFEPAY_SORT_ORDER;
             $this->plugin_name = 'Plugin 2.0.1 (' . PROJECT_VERSION . ')';
 
-            if (is_object($GLOBALS['order'])) {
+            if (is_object($order))
                 $this->update_status();
-            }
 
             // new configuration value
             if (MODULE_PAYMENT_MULTISAFEPAY_API_SERVER == 'Live' || MODULE_PAYMENT_MULTISAFEPAY_API_SERVER == 'Live account') {
@@ -64,21 +64,22 @@ if (!class_exists('multisafepay')) {
          */
 
         function update_status() {
-            if ($this->enabled && ((int) MODULE_PAYMENT_MULTISAFEPAY_ZONE > 0)) {
-                $check_flag = false;
-                $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MULTISAFEPAY_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
+            global $order;
 
+            if (($this->enabled == true) && ((int) MODULE_PAYMENT_MULTISAFEPAY_ZONE > 0)) {
+                $check_flag = false;
+                $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_MULTISAFEPAY_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
                 while ($check = tep_db_fetch_array($check_query)) {
                     if ($check['zone_id'] < 1) {
                         $check_flag = true;
                         break;
-                    } else if ($check['zone_id'] == $GLOBALS['order']->billing['zone_id']) {
+                    } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                         $check_flag = true;
                         break;
                     }
                 }
 
-                if (!$check_flag) {
+                if ($check_flag == false) {
                     $this->enabled = false;
                 }
             }

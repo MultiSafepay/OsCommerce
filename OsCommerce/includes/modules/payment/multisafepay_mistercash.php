@@ -29,22 +29,25 @@ class multisafepay_mistercash extends multisafepay {
      * Check whether this payment module is available
      */
 
-    function update_status() {
-        if ($this->enabled && ((int) MODULE_PAYMENT_MSP_MISTERCASH_ZONE > 0)) {
-            $check_flag = false;
-            $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MSP_MISTERCASH_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
 
+    
+    function update_status() {
+        global $order;
+
+        if (($this->enabled == true) && ((int) MODULE_PAYMENT_MSP_MISTERCASH_ZONE > 0)) {
+            $check_flag = false;
+            $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_MSP_MISTERCASH_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
             while ($check = tep_db_fetch_array($check_query)) {
                 if ($check['zone_id'] < 1) {
                     $check_flag = true;
                     break;
-                } else if ($check['zone_id'] == $GLOBALS['order']->billing['zone_id']) {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
             }
 
-            if (!$check_flag) {
+            if ($check_flag == false) {
                 $this->enabled = false;
             }
         }

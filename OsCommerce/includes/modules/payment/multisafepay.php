@@ -9,7 +9,7 @@
 
  */
 
-$dir = dirname(dirname(dirname(dirname(__FILE__))));
+$dir = dirname(__FILE__);
 require_once($dir . "/mspcheckout/include/MultiSafepay.combined.php");
 
 if (!class_exists('multisafepay')) {
@@ -327,7 +327,7 @@ if (!class_exists('multisafepay')) {
             $current_order = tep_db_query("SELECT orders_status FROM " . TABLE_ORDERS . " WHERE orders_id = " . $this->order_id);
             $current_order = tep_db_fetch_array($current_order);
             $old_order_status = $current_order['orders_status'];
-            $new_stat = DEFAULT_ORDERS_STATUS_ID;
+            $new_stat = $old_order_status;
 
             switch ($status) {
                 case "initialized":

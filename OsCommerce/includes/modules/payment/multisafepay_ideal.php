@@ -181,5 +181,20 @@ class multisafepay_ideal extends multisafepay
 			'MODULE_PAYMENT_MSP_IDEAL_DIRECT'
 		);
 	}
+        
+        
+        
+        function javascript_validation()
+	{   
+		$js = 'var issuer = document.checkout_payment.msp_issuer.value;';
+		$js .= 'if(issuer != 0){';
+		$js .= 'var payment = document.getElementsByName("payment");';
+		$js .= 'document.checkout_payment.payment.value = \'multisafepay_ideal\';';
+		$js .= 'return true;';
+	    $js .= '};';
+			   
+		return $js;
+	}
+        
 }
 ?>

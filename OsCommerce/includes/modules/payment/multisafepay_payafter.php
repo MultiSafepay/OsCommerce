@@ -684,8 +684,7 @@ class multisafepay_payafter {
 
 
         $url = $msp->startCheckout();
-        print_r($msp);
-        exit;
+
 
         if ($msp->error) {
             $this->_error_redirect($msp->error_code . ": " . $msp->error);

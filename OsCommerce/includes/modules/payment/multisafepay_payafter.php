@@ -25,7 +25,6 @@ class multisafepay_payafter {
      */
 
     function multisafepay_payafter($order_id = -1) {
-        global $order;
         $this->code = 'multisafepay_payafter';
         $this->title = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_TEXT_TITLE);
         $this->description = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_TEXT_TITLE);
@@ -337,30 +336,31 @@ class multisafepay_payafter {
      * Check whether this payment module is available
      */
 
-   
-    
     function update_status() {
-        global $order;
-
-        if (($this->enabled == true) && ((int) MODULE_PAYMENT_MSP_PAYAFTER_ZONE > 0)) {
+        // always disable
+        //$this->enabled = false;
+        if ($this->enabled && ((int) MODULE_PAYMENT_MSP_BANKTRANS_ZONE > 0)) {
             $check_flag = false;
-            $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_MSP_PAYAFTER_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
+            $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MSP_BANKTRANS_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
+
             while ($check = tep_db_fetch_array($check_query)) {
                 if ($check['zone_id'] < 1) {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
+                } else if ($check['zone_id'] == $GLOBALS['order']->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
             }
 
-            if ($check_flag == false) {
+            if (!$check_flag) {
                 $this->enabled = false;
             }
         }
+        /* if(MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_NORMAL_CHECKOUT != 'True'){
+          $this->enabled = false;
+          } */
     }
-    
 
     // ---- select payment module ----
 
@@ -592,6 +592,44 @@ class multisafepay_payafter {
         $price = 0;
         $taxes = array();
 
+
+        if (isset($GLOBALS['order']->info['msp_fee_inc_tax'])) {
+            if ($GLOBALS['order']->info['msp_fee_inc_tax'] > 0) {
+                $fee_rate = tep_get_tax_rate(MODULE_FIXED_PAYMENT_CHG_TAX_CLASS) / 100;
+
+                if ($fee_rate == 0) {
+                    $fee_rate = '0.00';
+                }
+                $table = new MspAlternateTaxTable();
+                $table->name = 'payment_fee';
+                $rule = new MspAlternateTaxRule($fee_rate);
+                $table->AddAlternateTaxRules($rule);
+                $msp->cart->AddAlternateTaxTables($table);
+
+                if ($GLOBALS['order']->info['msp_fee_inc_tax'] > 2.95) {
+                    $this->_error_redirect('Multisafepay fee to high!');
+                    exit();
+                }
+
+                $fee_inc_tax = $GLOBALS['order']->info['msp_fee_inc_tax'];
+                /* $tax = ($fee_inc_tax / 121) * 21;
+
+                  $fee = $fee_inc_tax - $tax;
+                  $fee = number_format($fee, 4, '.', ''); */
+
+                $c_item = new MspItem('Fee', 'Fee', 1, $fee_inc_tax, 'KG', 0); // Todo adjust the amount to cents, and round it up.
+                $c_item->SetMerchantItemId('Fee');
+                $c_item->SetTaxTableSelector('payment_fee');
+                $msp->cart->AddItem($c_item);
+
+                if ($fee_rate != 0) {
+                    $price += $GLOBALS['order']->info['msp_fee_inc_tax'];
+                }
+            }
+        }
+
+
+
         foreach ($GLOBALS['order']->products as $product) {
             if (isset($product['final_price'])) {
                 $price += $product['final_price'] * $product['qty'];
@@ -640,32 +678,14 @@ class multisafepay_payafter {
             $c_item->SetTaxTableSelector('shipping_tax');
         }
 
-        if (isset($GLOBALS['order']->info['msp_fee_inc_tax'])) {
-            if ($GLOBALS['order']->info['msp_fee_inc_tax'] > 0) {
 
-                if ($GLOBALS['order']->info['msp_fee_inc_tax'] > 2.95) {
-                    $this->_error_redirect('Multisafepay fee to high!');
-                    exit();
-                }
-
-                $fee_inc_tax = $GLOBALS['order']->info['msp_fee_inc_tax'];
-                $tax = ($fee_inc_tax / 121) * 21;
-
-                $fee = $fee_inc_tax - $tax;
-                $fee = number_format($fee, 4, '.', '');
-
-                $c_item = new MspItem('Fee', 'Fee', 1, $fee, 'KG', 0); // Todo adjust the amount to cents, and round it up.
-                $c_item->SetMerchantItemId('Fee');
-                $c_item->SetTaxTableSelector('BTW21');
-                $msp->cart->AddItem($c_item);
-            }
-        }
 
 
 
 
         $url = $msp->startCheckout();
-        //print_r($msp);exit;
+        print_r($msp);
+        exit;
 
         if ($msp->error) {
             $this->_error_redirect($msp->error_code . ": " . $msp->error);

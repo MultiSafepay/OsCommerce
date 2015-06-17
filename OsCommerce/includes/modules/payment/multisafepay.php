@@ -41,7 +41,7 @@ if (!class_exists('multisafepay')) {
             $this->description = MODULE_PAYMENT_MULTISAFEPAY_TEXT_DESCRIPTION;
             $this->enabled = MODULE_PAYMENT_MULTISAFEPAY_STATUS == 'True';
             $this->sort_order = MODULE_PAYMENT_MULTISAFEPAY_SORT_ORDER;
-            $this->plugin_name = 'Plugin 2.0.1 (' . PROJECT_VERSION . ')';
+            $this->plugin_name = 'Plugin 2.0.2 (' . PROJECT_VERSION . ')';
 
             if (is_object($GLOBALS['order'])) {
                 $this->update_status();
@@ -213,7 +213,7 @@ if (!class_exists('multisafepay')) {
 
             // start transaction
             $this->msp = new MultiSafepayAPI();
-            $this->msp->plugin_name = 'Plugin 2.0.1 (' . PROJECT_VERSION . ')';
+            $this->msp->plugin_name = 'Plugin 2.0.2 (' . PROJECT_VERSION . ')';
             $this->msp->test = (MODULE_PAYMENT_MULTISAFEPAY_API_SERVER != 'Live' && MODULE_PAYMENT_MULTISAFEPAY_API_SERVER != 'Live account');
             $this->msp->merchant['account_id'] = MODULE_PAYMENT_MULTISAFEPAY_ACCOUNT_ID;
             $this->msp->merchant['site_id'] = MODULE_PAYMENT_MULTISAFEPAY_SITE_ID;
@@ -309,7 +309,7 @@ if (!class_exists('multisafepay')) {
 
         function checkout_notify() {
             $this->msp = new MultiSafepayAPI();
-            $this->msp->plugin_name = 'Plugin 2.0.1 (' . PROJECT_VERSION . ')';
+            $this->msp->plugin_name = 'Plugin 2.0.2 (' . PROJECT_VERSION . ')';
             $this->msp->test = (MODULE_PAYMENT_MULTISAFEPAY_API_SERVER != 'Live' && MODULE_PAYMENT_MULTISAFEPAY_API_SERVER != 'Live account');
             $this->msp->merchant['account_id'] = MODULE_PAYMENT_MULTISAFEPAY_ACCOUNT_ID;
             $this->msp->merchant['site_id'] = MODULE_PAYMENT_MULTISAFEPAY_SITE_ID;

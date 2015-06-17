@@ -30,7 +30,7 @@ class multisafepay_fastcheckout {
         $this->description = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_FCO_TEXT_TITLE);
         $this->enabled = MODULE_PAYMENT_MULTISAFEPAY_FCO_STATUS == 'True';
         $this->sort_order = MODULE_PAYMENT_MULTISAFEPAY_FCO_SORT_ORDER;
-        $this->plugin_name = 'Plugin 2.0.1 (' . PROJECT_VERSION . ')';
+        $this->plugin_name = 'Plugin 2.0.2 (' . PROJECT_VERSION . ')';
 
         if (is_object($order) || is_object($GLOBALS['order']))
             $this->update_status();

@@ -2,6 +2,7 @@
 
 chdir("../../../../");
 require("includes/application_top.php");
+define('DIR_WS_CLASSES', 'includes/classes/');
 
 require(DIR_WS_CLASSES . "payment.php");
 $payment_modules = new payment("multisafepay");
@@ -27,5 +28,5 @@ $payment_module->order_id = $_GET['transactionid'];
 $transdata = $payment_module->checkout_notify();
 
 
-tep_redirect($payment_module->_href_link('checkout_shipping.php', '', 'SSL', false, false));
+tep_redirect($payment_module->_href_link('checkout_payment.php', '', 'SSL', false, false));
 ?>

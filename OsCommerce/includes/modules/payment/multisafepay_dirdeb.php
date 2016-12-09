@@ -1,7 +1,7 @@
 <?php
 
 require( "multisafepay.php" );
-
+ 
 class multisafepay_dirdeb extends multisafepay {
 
     var $icon = "dirdeb.png";
@@ -14,9 +14,9 @@ class multisafepay_dirdeb extends multisafepay {
     function multisafepay_dirdeb() {
         global $order;
         $this->code = 'multisafepay_dirdeb';
-        $this->title = $this->getTitle('DirectDebit');
-        $this->public_title = $this->getTitle('DirectDebit');
-        $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay DirectDebit</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
+        $this->title = $this->getTitle('Direct Debit');
+        $this->public_title = $this->getTitle('Direct Debit');
+        $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay Direct Debit</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
         $this->enabled = MODULE_PAYMENT_MSP_DIRDEB_STATUS == 'True';
         $this->sort_order = MODULE_PAYMENT_MSP_DIRDEB_SORT_ORDER;
 
@@ -75,7 +75,7 @@ class multisafepay_dirdeb extends multisafepay {
      */
 
     function install() {
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable MultiSafepay DirectDebit Module', 'MODULE_PAYMENT_MSP_DIRDEB_STATUS', 'True', 'Do you want to accept DirectDebit payments?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable MultiSafepay Direct Debit module', 'MODULE_PAYMENT_MSP_DIRDEB_STATUS', 'True', 'Do you want to accept Direct Debit payments?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_MSP_DIRDEB_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0', now())");
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_MSP_DIRDEB_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '3', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
         //tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Direct iDeal', 'MODULE_PAYMENT_MSP_DIRDEB_DIRECT', 'True', 'Select the bank within the website?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");

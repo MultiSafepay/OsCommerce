@@ -1,7 +1,7 @@
 <?php
 
 require( "multisafepay.php" );
-
+ 
 class multisafepay_amex extends multisafepay {
 
     var $icon = "amex.png";
@@ -14,15 +14,17 @@ class multisafepay_amex extends multisafepay {
     function multisafepay_amex() {
         global $order;
         $this->code = 'multisafepay_amex';
-        $this->title = $this->getTitle('AMEX');
-        $this->public_title = $this->getTitle('AMEX');
-        $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay AMEX</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
+        $this->title = $this->getTitle('American Express');
+        $this->public_title = $this->getTitle('American Express');
+        $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay American Express</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
         $this->enabled = MODULE_PAYMENT_MSP_AMEX_STATUS == 'True';
         $this->sort_order = MODULE_PAYMENT_MSP_AMEX_SORT_ORDER;
 
 
         if (is_object($order))
+        {
             $this->update_status();
+        }
     }
 
     /*
@@ -73,7 +75,7 @@ class multisafepay_amex extends multisafepay {
      */
 
     function install() {
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable MultiSafepay AMEX Module', 'MODULE_PAYMENT_MSP_AMEX_STATUS', 'True', 'Do you want to accept AMEX payments?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable MultiSafepay American Express Module', 'MODULE_PAYMENT_MSP_AMEX_STATUS', 'True', 'Do you want to accept American Express payments?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_MSP_AMEX_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0', now())");
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_MSP_AMEX_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '3', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
         //tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Direct iDeal', 'MODULE_PAYMENT_MSP_AMEX_DIRECT', 'True', 'Select the bank within the website?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");

@@ -1,11 +1,13 @@
 <?php
 
 require( "multisafepay.php" );
-
+ 
 class multisafepay_ideal extends multisafepay {
 
     var $icon = "ideal.png";
     var $issuer = '';
+    var $liveurl    =   'https://api.multisafepay.com/v1/json/';
+    var $testurl    =   'https://testapi.multisafepay.com/v1/json/';
 
     /*
      * Constructor
@@ -13,10 +15,11 @@ class multisafepay_ideal extends multisafepay {
 
     function multisafepay_ideal() {
         global $order;
+        
         $this->code = 'multisafepay_ideal';
         $this->title = $this->getTitle('iDEAL');
         $this->public_title = $this->getTitle('iDEAL');
-        $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay iDeal</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
+        $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay iDEAL</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
         $this->enabled = MODULE_PAYMENT_MSP_IDEAL_STATUS == 'True';
         $this->sort_order = MODULE_PAYMENT_MSP_IDEAL_SORT_ORDER;
 
@@ -25,6 +28,16 @@ class multisafepay_ideal extends multisafepay {
             $this->update_status();
     }
 
+    /**
+     * 
+     * @global type $customer_id
+     * @global type $languages_id
+     * @global type $order
+     * @global type $order_totals
+     * @global type $order_products_id
+     * @return type
+     */
+    
     function selection() {
         global $customer_id;
         global $languages_id;
@@ -34,7 +47,6 @@ class multisafepay_ideal extends multisafepay {
 
         $issuers = $this->create_iDeal_box();
 
-
         $selection = array('id' => $this->code,
             'module' => $this->public_title,
             'fields' => array(array('title' => '',
@@ -42,58 +54,41 @@ class multisafepay_ideal extends multisafepay {
         return $selection;
     }
 
-    function create_iDeal_box() {
-        $msp = new MultiSafepayAPI();
-        $msp->plugin_name = $this->plugin_name;
-        $msp->test = (MODULE_PAYMENT_MULTISAFEPAY_API_SERVER != 'Live' && MODULE_PAYMENT_MULTISAFEPAY_API_SERVER != 'Live account');
-        $msp->merchant['account_id'] = MODULE_PAYMENT_MULTISAFEPAY_ACCOUNT_ID;
-        $msp->merchant['site_id'] = MODULE_PAYMENT_MULTISAFEPAY_SITE_ID;
-        $msp->merchant['site_code'] = MODULE_PAYMENT_MULTISAFEPAY_SITE_SECURE_CODE;
+    /**
+     * 
+     * @return type
+     */
+    
+    function create_iDeal_box() 
+    {
+        $msp = new \MultiSafepayAPI\Client();
 
-        $iDealIssuers = $msp->getIdealIssuers();
-        $issuers = array();
-        if ($msp->test) {
-            $i = 0;
-            $issuers[$i]['id'] = 0;
-            $issuers[$i]['text'] = "Kies uw bank";
-            $i++;
-            foreach ($iDealIssuers['issuers'] as $issuer) {
-                $issuers[$i]['id'] = $issuer['code']['VALUE'];
-                $issuers[$i]['text'] = $issuer['description']['VALUE'];
-                $i++;
-            }
-        } else {
-            $i = 0;
-            $issuers[$i]['id'] = 0;
-            $issuers[$i]['text'] = "Kies uw bank";
-            $i++;
-            foreach ($iDealIssuers['issuers']['issuer'] as $issuer) {
-                $issuers[$i]['id'] = $issuer['code']['VALUE'];
-                $issuers[$i]['text'] = $issuer['description']['VALUE'];
-                $i++;
-            }
+        if (MODULE_PAYMENT_MULTISAFEPAY_API_SERVER == 'Live account')
+        {
+            $msp->setApiUrl($this->liveurl);
+        } else
+        {
+            $msp->setApiUrl($this->testurl);
         }
+
+        $msp->setApiKey(MODULE_PAYMENT_MULTISAFEPAY_API_KEY);
+
+        $iDealIssuers = $msp->issuers->get();
+
+        $issuers = array();
+        $i = 0;
+        $issuers[$i]['id'] = null;
+        $issuers[$i]['text'] = "Select a bank";
+        $i++;
+
+        foreach ($iDealIssuers as $issuer)
+        {
+            $issuers[$i]['id'] = $issuer->code;
+            $issuers[$i]['text'] = $issuer->description;
+            $i++;
+        }
+
         return $issuers;
-
-        /* $output = '<div class="idealbox" style="padding:20px;border:1px solid #d50172; margin-top:20px;text-align:center">';
-          $output .= '<img src="images/multisafepay/en/ideal-big.jpg" border="0" width="113" height="88"/><br /><br />';
-          $output .= "<select name='msp_issuer' style='width:164px; padding: 2px; margin-left: 7px;'>";
-          $output .='<option>Kies uw bank</option>';
-
-          if ( $msp->test ){
-          foreach($iDealIssuers['issuers'] as $issuer)
-          {
-          $output .= '<option value="'.$issuer['code']['VALUE'].'">'.$issuer['description']['VALUE'].'</option>';
-          }
-          }else{
-          foreach($iDealIssuers['issuers']['issuer'] as $issuer)
-          {
-          $output .= '<option value="'.$issuer['code']['VALUE'].'">'.$issuer['description']['VALUE'].'</option>';
-          }
-          }
-          $output .= '</select><div style="clear:both;"></div></div><br />';
-          return ($output);
-         */
     }
 
     /*

@@ -1,7 +1,7 @@
 <?php
 
 require( "multisafepay.php" );
-
+ 
 class multisafepay_visa extends multisafepay {
 
     var $icon = "visa.png";

@@ -1,7 +1,6 @@
 <?php
 
-$dir = dirname(dirname(dirname(dirname(__FILE__))));
-require_once($dir . "/mspcheckout/include/MultiSafepay.combined.php");
+require_once(dirname(dirname(dirname(dirname(__FILE__)))) . "/mspcheckout/include/API/Autoloader.php");
 
 class multisafepay_fastcheckout {
 
@@ -20,11 +19,9 @@ class multisafepay_fastcheckout {
     var $taxes = array();
     var $_customer_id = 0;
 
-    /*
-     * Constructor
-     */
-
-    function multisafepay_fastcheckout($order_id = -1) {
+    function multisafepay_fastcheckout($order_id = -1)
+    {
+        global $order;
         $this->code = 'multisafepay_fastcheckout';
         $this->title = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_FCO_TEXT_TITLE);
         $this->description = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_FCO_TEXT_TITLE);
@@ -36,9 +33,11 @@ class multisafepay_fastcheckout {
             $this->update_status();
 
         // new configuration value
-        if (MODULE_PAYMENT_MULTISAFEPAY_FCO_API_SERVER == 'Live' || MODULE_PAYMENT_MULTISAFEPAY_FCO_API_SERVER == 'Live account') {
+        if (MODULE_PAYMENT_MULTISAFEPAY_FCO_API_SERVER == 'Live' || MODULE_PAYMENT_MULTISAFEPAY_FCO_API_SERVER == 'Live account')
+        {
             $this->api_url = 'https://api.multisafepay.com/ewx/';
-        } else {
+        } else
+        {
             $this->api_url = 'https://testapi.multisafepay.com/ewx/';
         }
 
@@ -47,29 +46,35 @@ class multisafepay_fastcheckout {
         $this->status = null;
     }
 
-    function getTitle($admin = 'title') {
+    function getTitle($admin = 'title')
+    {
         $title = ($this->checkView() == "checkout") ? $this->generateIcon($this->getIcon()) . " " : "";
 
         $title .= ($this->checkView() == "admin") ? "MultiSafepay - " : "";
-        if ($admin && $this->checkView() == "admin") {
+        if ($admin && $this->checkView() == "admin")
+        {
             $title .= $admin;
-        } else {
+        } else
+        {
             $title .= $this->getLangStr($admin);
         };
 
         return $title;
     }
 
-    function getLangStr($str) {
+    function getLangStr($str)
+    {
         $holder = '';
         return $holder;
     }
 
-    function generateIcon($icon) {
+    function generateIcon($icon)
+    {
         return tep_image($icon);
     }
 
-    function getScriptName() {
+    function getScriptName()
+    {
         global $PHP_SELF;
 
         return basename($PHP_SELF);
@@ -83,37 +88,46 @@ class multisafepay_fastcheckout {
          */
     }
 
-    function getIcon() {
+    function getIcon()
+    {
         $icon = DIR_WS_IMAGES . "multisafepay/en/" . $this->icon;
 
-        if (file_exists(DIR_WS_IMAGES . "multisafepay/" . strtolower($this->getUserLanguage("DETECT")) . "/" . $this->icon)) {
+        if (file_exists(DIR_WS_IMAGES . "multisafepay/" . strtolower($this->getUserLanguage("DETECT")) . "/" . $this->icon))
+        {
             $icon = DIR_WS_IMAGES . "multisafepay/" . strtolower($this->getUserLanguage("DETECT")) . "/" . $this->icon;
             return $icon;
         }
     }
 
-    function getUserLanguage($savedSetting) {
-        if ($savedSetting != "DETECT") {
+    function getUserLanguage($savedSetting)
+    {
+        if ($savedSetting != "DETECT")
+        {
             return $savedSetting;
         }
 
         global $languages_id;
 
         $query = tep_db_query("select languages_id, name, code, image, directory from " . TABLE_LANGUAGES . " where languages_id = " . (int) $languages_id . " limit 1");
-        if ($languages = tep_db_fetch_array($query)) {
+        if ($languages = tep_db_fetch_array($query))
+        {
             return strtoupper($languages['code']);
         }
 
         return "EN";
     }
 
-    function checkView() {
+    function checkView()
+    {
         $view = "admin";
 
-        if (!tep_session_is_registered('admin')) {
-            if ($this->getScriptName() == FILENAME_CHECKOUT_PAYMENT) {
+        if (!tep_session_is_registered('admin'))
+        {
+            if ($this->getScriptName() == FILENAME_CHECKOUT_PAYMENT)
+            {
                 $view = "checkout";
-            } else {
+            } else
+            {
                 $view = "frontend";
             }
         }
@@ -121,10 +135,12 @@ class multisafepay_fastcheckout {
     }
 
     // This is a copy from process.php	
-    function get_shipping_methods($weight) {
+    function get_shipping_methods($weight)
+    {
         global $shipping_weight, $shipping_num_boxes;
         //require_once("includes/application_top.php");
-        if (!empty($GLOBALS['_SESSION']['language'])) {
+        if (!empty($GLOBALS['_SESSION']['language']))
+        {
             require_once('includes/languages/' . $GLOBALS['_SESSION']['language'] . '/modules/payment/multisafepay_fastcheckout.php');
         }
         //require_once(DIR_WS_CLASSES . 'order.php');
@@ -137,13 +153,16 @@ class multisafepay_fastcheckout {
         $shipping_num_boxes = 1;
         $shipping_weight = $total_weight;
 
-        if (SHIPPING_BOX_WEIGHT >= $shipping_weight * SHIPPING_BOX_PADDING / 100) {
+        if (SHIPPING_BOX_WEIGHT >= $shipping_weight * SHIPPING_BOX_PADDING / 100)
+        {
             $shipping_weight = $shipping_weight + SHIPPING_BOX_WEIGHT;
-        } else {
+        } else
+        {
             $shipping_weight = $shipping_weight + ($shipping_weight * SHIPPING_BOX_PADDING / 100);
         }
 
-        if ($shipping_weight > SHIPPING_MAX_WEIGHT) { // Split into many boxes
+        if ($shipping_weight > SHIPPING_MAX_WEIGHT)
+        { // Split into many boxes
             $shipping_num_boxes = ceil($shipping_weight / SHIPPING_MAX_WEIGHT);
             $shipping_weight = $shipping_weight / $shipping_num_boxes;
         }
@@ -157,17 +176,22 @@ class multisafepay_fastcheckout {
          * Load shipping modules
          */
         $module_directory = dirname(dirname(__FILE__)) . '/' . 'shipping/';
-        if (!file_exists($module_directory)) {
+        if (!file_exists($module_directory))
+        {
             echo 'Error: ' . $module_directory;
         }
 
         // find module files
         $file_extension = substr(__FILE__, strrpos(__FILE__, '.'));
         $directory_array = array();
-        if ($dir = @ dir($module_directory)) {
-            while ($file = $dir->read()) {
-                if (!is_dir($module_directory . $file)) {
-                    if (substr($file, strrpos($file, '.')) == $file_extension) {
+        if ($dir = @ dir($module_directory))
+        {
+            while ($file = $dir->read())
+            {
+                if (!is_dir($module_directory . $file))
+                {
+                    if (substr($file, strrpos($file, '.')) == $file_extension)
+                    {
                         $directory_array[] = $file;
                     }
                 }
@@ -186,7 +210,8 @@ class multisafepay_fastcheckout {
         $module_info = array();
         $module_info_enabled = array();
         $shipping_modules = array();
-        for ($i = 0, $n = sizeof($directory_array); $i < $n; $i++) {
+        for ($i = 0, $n = sizeof($directory_array); $i < $n; $i++)
+        {
             $file = $directory_array[$i];
             global $language;
             include_once (DIR_FS_CATALOG . DIR_WS_LANGUAGES . $language . '/modules/shipping/' . $file);
@@ -196,7 +221,8 @@ class multisafepay_fastcheckout {
             $module = new $class;
             $curr_ship = strtoupper($module->code);
 
-            switch ($curr_ship) {
+            switch ($curr_ship)
+            {
                 case 'FEDEXGROUND':
                     $curr_ship = 'FEDEX_GROUND';
                     break;
@@ -214,10 +240,12 @@ class multisafepay_fastcheckout {
             }
 
 
-            if (@constant('MODULE_SHIPPING_' . $curr_ship . '_STATUS') == 'True') {
+            if (@constant('MODULE_SHIPPING_' . $curr_ship . '_STATUS') == 'True')
+            {
                 $module_info_enabled[$module->code] = array('enabled' => true);
             }
-            if ($module->check() == true) {
+            if ($module->check() == true)
+            {
                 $module_info[$module->code] = array(
                     'code' => $module->code,
                     'title' => $module->title,
@@ -225,7 +253,8 @@ class multisafepay_fastcheckout {
                     'status' => $module->check());
             }
 
-            if (!empty($module_info_enabled[$module->code]['enabled'])) {
+            if (!empty($module_info_enabled[$module->code]['enabled']))
+            {
                 $shipping_modules[$module->code] = $module;
             }
         }
@@ -236,10 +265,12 @@ class multisafepay_fastcheckout {
         $shipping_methods = array();
 
 
-        foreach ($module_info as $key => $value) {
+        foreach ($module_info as $key => $value)
+        {
             // check if active
             $module_name = $module_info[$key]['code'];
-            if (!$module_info_enabled[$module_name]) {
+            if (!$module_info_enabled[$module_name])
+            {
                 continue;
             }
 
@@ -266,7 +297,8 @@ class multisafepay_fastcheckout {
             @$table_mode = constant($common_string . "MODE");
 
             // allowed countries - zones	
-            if ($zone != '') {
+            if ($zone != '')
+            {
                 $zone_result = tep_db_query("SELECT countries_name, coalesce(zone_code, 'All Areas') zone_code, countries_iso_code_2
                                   FROM " . TABLE_GEO_ZONES . " AS gz
                                   inner join " . TABLE_ZONES_TO_GEO_ZONES . " AS ztgz on gz.geo_zone_id = ztgz.geo_zone_id
@@ -276,13 +308,15 @@ class multisafepay_fastcheckout {
 
                 $allowed_restriction_state = $allowed_restriction_country = array();
                 // Get all the allowed shipping zones.
-                while ($zone_answer = tep_db_fetch_array($zone_result)) {
+                while ($zone_answer = tep_db_fetch_array($zone_result))
+                {
                     $allowed_restriction_state[] = $zone_answer['zone_code'];
                     $allowed_restriction_country[] = $zone_answer['countries_iso_code_2'];
                 }
             }
 
-            if ($curr_tax_class != 0 && $curr_tax_class != '') {
+            if ($curr_tax_class != 0 && $curr_tax_class != '')
+            {
                 $tax_class[] = $curr_tax_class;
 
                 if (!in_array($curr_tax_class, $tax_class_unique))
@@ -290,8 +324,10 @@ class multisafepay_fastcheckout {
             }
 
 
-            if (empty($quote['error']) && $quote['id'] != 'zones') {
-                foreach ($quote['methods'] as $method) {
+            if (empty($quote['error']) && $quote['id'] != 'zones')
+            {
+                foreach ($quote['methods'] as $method)
+                {
                     $shipping_methods[] = array(
                         'id' => $quote['id'],
                         'module' => $quote['module'],
@@ -302,29 +338,36 @@ class multisafepay_fastcheckout {
                         'zone' => $zone,
                     );
                 }
-            } elseif ($quote['id'] == 'zones') {
-                for ($cur_zone = 1; $cur_zone <= $module->num_zones; $cur_zone++) {
+            } elseif ($quote['id'] == 'zones')
+            {
+                for ($cur_zone = 1; $cur_zone <= $module->num_zones; $cur_zone++)
+                {
                     $countries_table = constant('MODULE_SHIPPING_ZONES_COUNTRIES_' . $cur_zone);
                     $country_zones = split("[,]", $countries_table);
 
-                    if (count($country_zones) > 1 || !empty($country_zones[0])) {
+                    if (count($country_zones) > 1 || !empty($country_zones[0]))
+                    {
                         $shipping = -1;
                         $zones_cost = constant('MODULE_SHIPPING_ZONES_COST_' . $cur_zone);
 
                         $zones_table = split("[:,]", $zones_cost);
                         $size = sizeof($zones_table);
-                        for ($i = 0; $i < $size; $i+=2) {
-                            if ($shipping_weight <= $zones_table[$i]) {
+                        for ($i = 0; $i < $size; $i+=2)
+                        {
+                            if ($shipping_weight <= $zones_table[$i])
+                            {
                                 $shipping = $zones_table[$i + 1];
                                 $shipping_method = $shipping_weight . ' ' . MODULE_SHIPPING_ZONES_TEXT_UNITS;
                                 break;
                             }
                         }
 
-                        if ($shipping == -1) {
+                        if ($shipping == -1)
+                        {
                             $shipping_cost = 0;
                             $shipping_method = MODULE_SHIPPING_ZONES_UNDEFINED_RATE;
-                        } else {
+                        } else
+                        {
                             $shipping_cost = ($shipping * $shipping_num_boxes) + constant('MODULE_SHIPPING_ZONES_HANDLING_' . $cur_zone);
 
                             $shipping_methods[] = array(
@@ -346,11 +389,14 @@ class multisafepay_fastcheckout {
      * Return image to show in cart
      */
 
-    function checkout_initialization_method() {
+    function checkout_initialization_method()
+    {
         global $currency;
-        if ($currency == "EUR") {
+        if ($currency == "EUR")
+        {
             $cart = $GLOBALS['cart'];
-            if ($cart->count_contents() > 0) {
+            if ($cart->count_contents() > 0)
+            {
                 return '<br/><br/><a href="mspcheckout/process.php"><img src="mspcheckout/images/button.png" alt="Checkout" name="Checkout"/></a>';
             }
         }
@@ -360,28 +406,35 @@ class multisafepay_fastcheckout {
      * Check whether this payment module is available
      */
 
-    function update_status() {
+    function update_status()
+    {
         // always disable
         //$this->enabled = false;
-        if ($this->enabled && ((int) MODULE_PAYMENT_MSP_BANKTRANS_ZONE > 0)) {
+        if ($this->enabled && ((int) MODULE_PAYMENT_MSP_BANKTRANS_ZONE > 0))
+        {
             $check_flag = false;
             $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MSP_BANKTRANS_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
 
-            while ($check = tep_db_fetch_array($check_query)) {
-                if ($check['zone_id'] < 1) {
+            while ($check = tep_db_fetch_array($check_query))
+            {
+                if ($check['zone_id'] < 1)
+                {
                     $check_flag = true;
                     break;
-                } else if ($check['zone_id'] == $GLOBALS['order']->billing['zone_id']) {
+                } else if ($check['zone_id'] == $GLOBALS['order']->billing['zone_id'])
+                {
                     $check_flag = true;
                     break;
                 }
             }
 
-            if (!$check_flag) {
+            if (!$check_flag)
+            {
                 $this->enabled = false;
             }
         }
-        if (MODULE_PAYMENT_MULTISAFEPAY_FCO_NORMAL_CHECKOUT != 'True') {
+        if (MODULE_PAYMENT_MULTISAFEPAY_FCO_NORMAL_CHECKOUT != 'True')
+        {
             $this->enabled = false;
         }
     }
@@ -392,7 +445,8 @@ class multisafepay_fastcheckout {
      * Client side javascript that will verify any input fields you use in the
      * payment method selection page
      */
-    function javascript_validation() {
+    function javascript_validation()
+    {
         return false;
     }
 
@@ -400,7 +454,8 @@ class multisafepay_fastcheckout {
      * Outputs the payment method title/text and if required, the input fields
      */
 
-    function selection() {
+    function selection()
+    {
         global $customer_id;
         global $languages_id;
         global $order;
@@ -408,7 +463,8 @@ class multisafepay_fastcheckout {
         global $order_products_id;
 
         // check if transaction is possible
-        if (empty($this->api_url)) {
+        if (empty($this->api_url))
+        {
             return;
         }
 
@@ -422,7 +478,8 @@ class multisafepay_fastcheckout {
      * Any checks of any conditions after payment method has been selected
      */
 
-    function pre_confirmation_check() {
+    function pre_confirmation_check()
+    {
         return false;
     }
 
@@ -432,7 +489,8 @@ class multisafepay_fastcheckout {
      * Any checks or processing on the order information before proceeding to
      * payment confirmation
      */
-    function confirmation() {
+    function confirmation()
+    {
         return false;
     }
 
@@ -441,7 +499,8 @@ class multisafepay_fastcheckout {
      * gateway
      */
 
-    function process_button() {
+    function process_button()
+    {
         return false;
     }
 
@@ -450,7 +509,8 @@ class multisafepay_fastcheckout {
     /*
      * Payment verification
      */
-    function before_process() {
+    function before_process()
+    {
         $this->_save_order();
 
         tep_redirect($this->_start_fastcheckout());
@@ -460,7 +520,8 @@ class multisafepay_fastcheckout {
      * Post-processing of the payment/order after the order has been finalised
      */
 
-    function after_process() {
+    function after_process()
+    {
         return false;
     }
 
@@ -469,11 +530,13 @@ class multisafepay_fastcheckout {
     /*
      * Advanced error handling
      */
-    function output_error() {
+    function output_error()
+    {
         return false;
     }
 
-    function get_error() {
+    function get_error()
+    {
         $error = array(
             'title' => MODULE_PAYMENT_MULTISAFEPAY_FCO_TEXT_ERROR,
             'error' => $this->_get_error_message($_GET['error'])
@@ -483,7 +546,8 @@ class multisafepay_fastcheckout {
     }
 
     // ---- MultiSafepay ----
-    function isNewAddressQuery() {
+    function isNewAddressQuery()
+    {
         // Check for mandatory parameters
         $country = $_GET['country'];
         $countryCode = $_GET['countrycode'];
@@ -497,7 +561,8 @@ class multisafepay_fastcheckout {
     }
 
     // Handles new shipping costs request
-    function handleShippingMethodsNotification() {
+    function handleShippingMethodsNotification()
+    {
         $country = $_GET['country'];
         $countryCode = $_GET['countrycode'];
         $transactionId = $_GET['transactionid'];
@@ -509,11 +574,13 @@ class multisafepay_fastcheckout {
     }
 
     // Returns XML with new shipping costs
-    function getShippingMethodsFilteredXML($country, $countryCode, $weight, $size, $transactionId) {
+    function getShippingMethodsFilteredXML($country, $countryCode, $weight, $size, $transactionId)
+    {
         $outxml = '<shipping-info>';
         $methods = $this->getShippingMethodsFiltered($country, $countryCode, $weight, $size, $transactionId);
 
-        foreach ($methods as $method) {
+        foreach ($methods as $method)
+        {
             $outxml .= '<shipping>';
             $outxml .= '<shipping-name>';
             $outxml .= $method['name'];
@@ -533,13 +600,16 @@ class multisafepay_fastcheckout {
     // 'name' => 'test-name'
     // 'cost' => '123'
     // 'currency' => 'EUR' (currently only this supported)
-    function getShippingMethodsFiltered($country, $countryCode, $weight, $size, $transactionId) {
+    function getShippingMethodsFiltered($country, $countryCode, $weight, $size, $transactionId)
+    {
         $out = array();
         $shipping_methods = $this->get_shipping_methods($weight);
 
-        foreach ($shipping_methods as $shipping_method) {
+        foreach ($shipping_methods as $shipping_method)
+        {
 
-            if (in_array(strtoupper($countryCode), $shipping_method['allowed'])) {
+            if (in_array(strtoupper($countryCode), $shipping_method['allowed']))
+            {
                 // ISO codes match - add to output list
                 $shipping = array();
                 $shipping['name'] = $shipping_method['module'] . ' - ' . $shipping_method['title'];
@@ -548,8 +618,10 @@ class multisafepay_fastcheckout {
                 $out[] = $shipping;
             }
 
-            foreach ($shipping_method['allowed'] as $allowed_countries) {
-                if (in_array(strtoupper($countryCode), $allowed_countries)) {
+            foreach ($shipping_method['allowed'] as $allowed_countries)
+            {
+                if (in_array(strtoupper($countryCode), $allowed_countries))
+                {
                     // ISO codes match - add to output list
                     $shipping = array();
                     $shipping['name'] = $shipping_method['module'] . ' - ' . $shipping_method['title'];
@@ -563,13 +635,15 @@ class multisafepay_fastcheckout {
         return $out;
     }
 
-    function _start_fastcheckout() {
+    function _start_fastcheckout()
+    {
         $amount = $this->convertEuro($GLOBALS['order']->info['total']);
         $amount = $amount * 100;
 
         // generate items list
         $items = "<ul>\n";
-        foreach ($GLOBALS['order']->products as $product) {
+        foreach ($GLOBALS['order']->products as $product)
+        {
             $items .= "<li>" . $product['name'] . "</li>\n";
         }
         $items .= "</ul>\n";
@@ -586,7 +660,8 @@ class multisafepay_fastcheckout {
         $msp->merchant['cancel_url'] = $this->_href_link('shopping_cart.php', '', 'SSL', false, false);
         $msp->use_shipping_notification = true; // this modules has this enabled
 
-        if (MODULE_PAYMENT_MULTISAFEPAY_FCO_AUTO_REDIRECT == "True") {
+        if (MODULE_PAYMENT_MULTISAFEPAY_FCO_AUTO_REDIRECT == "True")
+        {
             $msp->merchant['redirect_url'] = $this->_href_link('ext/modules/payment/multisafepay/success.php', '', 'SSL', false, false);
         }
 
@@ -624,13 +699,16 @@ class multisafepay_fastcheckout {
         $GLOBALS['multisafepay_order_id'] = $this->order_id;
         tep_session_register('multisafepay_order_id');
 
-        foreach ($this->shipping_methods as $shipping_method) {
+        foreach ($this->shipping_methods as $shipping_method)
+        {
             $name = $shipping_method['module'] . ' - ' . $shipping_method['title'];
             $ship = new MspFlatRateShipping($name, $shipping_method['price']);
 
-            if (!empty($shipping_method['allowed'])) {
+            if (!empty($shipping_method['allowed']))
+            {
                 $filter = new MspShippingFilters();
-                foreach ($shipping_method['allowed'] as $country) {
+                foreach ($shipping_method['allowed'] as $country)
+                {
                     $filter->AddAllowedPostalArea($country);
                 }
                 $ship->AddShippingRestrictions($filter);
@@ -639,12 +717,14 @@ class multisafepay_fastcheckout {
             $msp->cart->AddShipping($ship);
         }
 
-        if (!empty($this->taxes['default'])) {
+        if (!empty($this->taxes['default']))
+        {
             $rule = new MspDefaultTaxRule($this->taxes['default'], 'true');
             $msp->cart->AddDefaultTaxRules($rule);
         }
 
-        foreach ($this->taxes['alternate'] as $name => $rate) {
+        foreach ($this->taxes['alternate'] as $name => $rate)
+        {
             $table = new MspAlternateTaxTable($name, 'true');
             $rule = new MspAlternateTaxRule($rate);
             $table->AddAlternateTaxRules($rule);
@@ -654,23 +734,29 @@ class multisafepay_fastcheckout {
         $this->getCustomFields($msp);
         $url = $msp->startCheckout();
 
-        if ($msp->error) {
+        if ($msp->error)
+        {
             $this->_error_redirect($msp->error_code . ": " . $msp->error);
             exit();
         }
         return $url;
     }
 
-    function getItems($msp) {
-        foreach ($GLOBALS['order']->products as $product) {
+    function getItems($msp)
+    {
+        foreach ($GLOBALS['order']->products as $product)
+        {
             $price = $product['price'];
-            if (isset($product['final_price'])) {
+            if (isset($product['final_price']))
+            {
                 $price = $product['final_price'];
             }
 
             $attributeString = '';
-            if (!empty($product['attributes'])) {
-                foreach ($product['attributes'] as $attribute) {
+            if (!empty($product['attributes']))
+            {
+                foreach ($product['attributes'] as $attribute)
+                {
                     $attributeString .= $attribute['option'] . ' ' . $attribute['value'] . ', ';
                 }
                 $attributeString = substr($attributeString, 0, -2);
@@ -680,9 +766,11 @@ class multisafepay_fastcheckout {
             $c_item = new MspItem($product['name'] . $attributeString, $product['model'], $product['qty'], $this->convertEuro($price), 'KG', $product['weight']);
             $c_item->SetMerchantItemId($product['id']);
 
-            if ($product['tax_description'] != 'Unknown tax rate') {
+            if ($product['tax_description'] != 'Unknown tax rate')
+            {
                 $tax_name = $product['tax_description'];
-                if (empty($tax_name)) {
+                if (empty($tax_name))
+                {
                     $tax_name = 'rate' . $product['tax'];
                 }
                 $c_item->SetTaxTableSelector($tax_name);
@@ -692,7 +780,8 @@ class multisafepay_fastcheckout {
         }
     }
 
-    function convertEuro($value, $round = true) {
+    function convertEuro($value, $round = true)
+    {
         $currency = 'EUR';
         $rate = $GLOBALS['currencies']->currencies[$currency]['value'];
         $new_total = $value * $rate;
@@ -703,12 +792,14 @@ class multisafepay_fastcheckout {
         return $new_total;
     }
 
-    function checkout_notify() {
+    function checkout_notify()
+    {
         global $currencies;
         $this->order_id = $_GET['transactionid'];
 
         // Check if new address query
-        if ($this->isNewAddressQuery()) {
+        if ($this->isNewAddressQuery())
+        {
             $this->handleShippingMethodsNotification();
             exit(0); // Nothing else to do
         }
@@ -725,15 +816,18 @@ class multisafepay_fastcheckout {
         // get status
         $status = $msp->getStatus();
 
-        if ($msp->error) {
+        if ($msp->error)
+        {
             echo $msp->error_code . ": " . $msp->error;
             exit();
         }
 
-        if (!$msp->details['transaction']['var1']) { // no customer_id, so create a customer
+        if (!$msp->details['transaction']['var1'])
+        { // no customer_id, so create a customer
             //$this->resume_session($msp->details);
             $customer_id = $this->get_customer($msp->details);
-        } else {
+        } else
+        {
             //$this->resume_session($msp->details);
             $customer_id = $msp->details['transaction']['var1'];
             //tep_session_register('customer_id');
@@ -780,13 +874,15 @@ class multisafepay_fastcheckout {
                 //'currency_value' => $order->info['currency_value']);
         );
 
-        if ($customer_id) {
+        if ($customer_id)
+        {
             $sql_data_array['customers_id'] = $customer_id;
         }
 
         // create query and update
         $query = "UPDATE " . TABLE_ORDERS . " SET ";
-        foreach ($sql_data_array as $key => $val) {
+        foreach ($sql_data_array as $key => $val)
+        {
             $query .= $key . " = '" . $val . "',";
         }
         $query = substr($query, 0, -1);
@@ -818,12 +914,14 @@ class multisafepay_fastcheckout {
         $value = $msp->details['shipping']['cost'];
         $title = $msp->details['shipping']['name'];
         $text = $currencies->format($value, false, 'EUR', $currencies->currencies[$currency]['value']);
-        if ($check_shipping) {
+        if ($check_shipping)
+        {
             $query = "UPDATE " . TABLE_ORDERS_TOTAL .
                     " SET title = '" . $title . "', value = '" . $value . "', text = '" . $text . "'" .
                     " WHERE class = 'ot_shipping' AND orders_id = '" . $this->order_id . "'";
             tep_db_query($query);
-        } else {
+        } else
+        {
             $query = "INSERT INTO " . TABLE_ORDERS_TOTAL .
                     "(orders_id, title, text, value, class, sort_order)" .
                     " VALUES ('" . $this->order_id . "','" . $title . "','" . $text . "','" . $value . "','ot_shipping','2')";
@@ -841,13 +939,15 @@ class multisafepay_fastcheckout {
         $notify_customer = false;
         $new_order_status = null;
 
-        switch ($status) {
+        switch ($status)
+        {
             case "initialized":
                 $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_INITIALIZED;
                 $reset_cart = true;
                 break;
             case "completed":
-                if ($old_order_status == MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_INITIALIZED || $old_order_status == DEFAULT_ORDERS_STATUS_ID || !$old_order_status) {
+                if ($old_order_status == MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_INITIALIZED || $old_order_status == DEFAULT_ORDERS_STATUS_ID || !$old_order_status)
+                {
                     $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_COMPLETED;
                     $reset_cart = true;
                     // $notify_customer = ($old_order_status != $new_order_status);
@@ -862,20 +962,24 @@ class multisafepay_fastcheckout {
                 break;
             case "void":
                 $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_VOID;
-                if ($old_order_status != MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_VOID) {
+                if ($old_order_status != MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_VOID)
+                {
                     $order_query = tep_db_query("select products_id, products_quantity from " . TABLE_ORDERS_PRODUCTS . " where orders_id = '" . $this->order_id . "'");
 
-                    while ($order = tep_db_fetch_array($order_query)) {
+                    while ($order = tep_db_fetch_array($order_query))
+                    {
                         tep_db_query("update " . TABLE_PRODUCTS . " set products_quantity = products_quantity + " . $order['products_quantity'] . ", products_ordered = products_ordered - " . $order['products_quantity'] . " where products_id = '" . (int) $order['products_id'] . "'");
                     }
                 }
                 break;
             case "declined":
                 $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_DECLINED;
-                if ($old_order_status != MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_DECLINED) {
+                if ($old_order_status != MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_DECLINED)
+                {
                     $order_query = tep_db_query("select products_id, products_quantity from " . TABLE_ORDERS_PRODUCTS . " where orders_id = '" . $this->order_id . "'");
 
-                    while ($order = tep_db_fetch_array($order_query)) {
+                    while ($order = tep_db_fetch_array($order_query))
+                    {
                         tep_db_query("update " . TABLE_PRODUCTS . " set products_quantity = products_quantity + " . $order['products_quantity'] . ", products_ordered = products_ordered - " . $order['products_quantity'] . " where products_id = '" . (int) $order['products_id'] . "'");
                     }
                 }
@@ -891,10 +995,12 @@ class multisafepay_fastcheckout {
                 break;
             case "expired":
                 $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_FCO_ORDER_STATUS_ID_EXPIRED;
-                if ($old_order_status != MODULE_PAYMENT_MULTISAFEPAY_ORDER_STATUS_ID_EXPIRED) {
+                if ($old_order_status != MODULE_PAYMENT_MULTISAFEPAY_ORDER_STATUS_ID_EXPIRED)
+                {
                     $order_query = tep_db_query("select products_id, products_quantity from " . TABLE_ORDERS_PRODUCTS . " where orders_id = '" . $this->order_id . "'");
 
-                    while ($order = tep_db_fetch_array($order_query)) {
+                    while ($order = tep_db_fetch_array($order_query))
+                    {
                         tep_db_query("update " . TABLE_PRODUCTS . " set products_quantity = products_quantity + " . $order['products_quantity'] . ", products_ordered = products_ordered - " . $order['products_quantity'] . " where products_id = '" . (int) $order['products_id'] . "'");
                     }
                 }
@@ -902,10 +1008,12 @@ class multisafepay_fastcheckout {
             case "cancelled":
                 $GLOBALS['order']->info['order_status'] = MODULE_PAYMENT_MULTISAFEPAY_ORDER_STATUS_ID_VOID;
                 $new_stat = MODULE_PAYMENT_MULTISAFEPAY_ORDER_STATUS_ID_VOID;
-                if ($old_order_status != MODULE_PAYMENT_MULTISAFEPAY_ORDER_STATUS_ID_VOID) {
+                if ($old_order_status != MODULE_PAYMENT_MULTISAFEPAY_ORDER_STATUS_ID_VOID)
+                {
                     $order_query = tep_db_query("select products_id, products_quantity from " . TABLE_ORDERS_PRODUCTS . " where orders_id = '" . $this->order_id . "'");
 
-                    while ($order = tep_db_fetch_array($order_query)) {
+                    while ($order = tep_db_fetch_array($order_query))
+                    {
                         tep_db_query("update " . TABLE_PRODUCTS . " set products_quantity = products_quantity + " . $order['products_quantity'] . ", products_ordered = products_ordered - " . $order['products_quantity'] . " where products_id = '" . (int) $order['products_id'] . "'");
                     }
                 }
@@ -917,13 +1025,15 @@ class multisafepay_fastcheckout {
         $GLOBALS['order']->info['order_status'] = $new_order_status;
 
         // update order with new status if needed
-        if ($new_order_status) {
+        if ($new_order_status)
+        {
             $order_status_query = tep_db_query("SELECT orders_status_name FROM " . TABLE_ORDERS_STATUS . " WHERE orders_status_id = '" . $new_order_status . "' AND language_id = '" . $GLOBALS['languages_id'] . "'");
             $order_status = tep_db_fetch_array($order_status_query);
             $GLOBALS['order']->info['orders_status'] = $order_status['orders_status_name'];
 
             // update order
-            if ($old_order_status != $new_order_status) {
+            if ($old_order_status != $new_order_status)
+            {
                 // update order
                 tep_db_query("UPDATE " . TABLE_ORDERS . " SET orders_status = " . $new_order_status . " WHERE orders_id = " . $this->order_id);
             }
@@ -934,10 +1044,13 @@ class multisafepay_fastcheckout {
         $GLOBALS['order_totals'] = $GLOBALS['order']->totals;
 
         // notify customer, or just add note to history
-        if ($notify_customer) {
+        if ($notify_customer)
+        {
             $this->_notify_customer($new_order_status);
-        } else {
-            if ($new_order_status && $old_order_status != $new_order_status) {
+        } else
+        {
+            if ($new_order_status && $old_order_status != $new_order_status)
+            {
                 $sql_data_array = array('orders_id' => $this->order_id,
                     'orders_status_id' => $new_order_status,
                     'date_added' => 'now()',
@@ -948,7 +1061,8 @@ class multisafepay_fastcheckout {
         }
 
         // reset cart
-        if ($reset_cart) {
+        if ($reset_cart)
+        {
             //tep_db_query("DELETE FROM " . TABLE_CUSTOMERS_BASKET . " WHERE customers_id = '" . (int)$GLOBALS['order']->customer['id'] . "'");
             //tep_db_query("DELETE FROM " . TABLE_CUSTOMERS_BASKET_ATTRIBUTES . " WHERE customers_id = '" . (int)$GLOBALS['order']->customer['id'] . "'");
         }
@@ -956,8 +1070,10 @@ class multisafepay_fastcheckout {
         return $status;
     }
 
-    function resume_session($details) {
-        if (isset($details['transaction']['var2'])) {
+    function resume_session($details)
+    {
+        if (isset($details['transaction']['var2']))
+        {
             list ($sess_id, $sess_name) = explode(";", $details['transaction']['var2']);
             //If session management is supported by this PHP version
             if (function_exists('session_id'))
@@ -967,7 +1083,8 @@ class multisafepay_fastcheckout {
         }
     }
 
-    function get_customer($details) {
+    function get_customer($details)
+    {
         $email = $details['customer']['email'];
         //    Check if the email exists
         $customer_exists = tep_db_fetch_array(tep_db_query("select customers_id from " .
@@ -975,10 +1092,12 @@ class multisafepay_fastcheckout {
 
 
         $new_user = false;
-        if ($customer_exists['customers_id'] != '') {
+        if ($customer_exists['customers_id'] != '')
+        {
             $customer_id = $customer_exists['customers_id'];
             //tep_session_register('customer_id');
-        } else {
+        } else
+        {
             $sql_data_array = array(
                 'customers_firstname' => tep_db_input($details['customer']['firstname']),
                 'customers_lastname' => tep_db_input($details['customer']['lastname']),
@@ -989,7 +1108,8 @@ class multisafepay_fastcheckout {
                 'customers_password' => tep_encrypt_password('test123'),
                 'customers_newsletter' => 1
             );
-            if (ACCOUNT_DOB == 'true') {
+            if (ACCOUNT_DOB == 'true')
+            {
                 $sql_data_array['customers_dob'] = 'now()';
             }
             tep_db_perform(TABLE_CUSTOMERS, $sql_data_array);
@@ -1016,7 +1136,8 @@ class multisafepay_fastcheckout {
         //      If not, add the addr as default one
 
 
-        if (!tep_db_num_rows($address_book->lengths)) {
+        if (!tep_db_num_rows($address_book->lengths))
+        {
             $country = $this->get_country_from_code($details['customer']['country']);
 
             $sql_data_array = array(
@@ -1042,7 +1163,8 @@ class multisafepay_fastcheckout {
             $customer_default_address_id = $address_id;
             $customer_country_id = $country['countries_id'];
             //$customer_zone_id = $zone_answer['zone_id'];
-        } else {
+        } else
+        {
             $customer_default_address_id = $address_book['address_book_id'];
             $customer_country_id = $address_book['entry_country_id'];
             //$customer_zone_id = $address_book['entry_zone_id'];
@@ -1057,36 +1179,45 @@ class multisafepay_fastcheckout {
         //  Customer exists, is logged and address book is up to date
     }
 
-    function get_country_from_code($code) {
+    function get_country_from_code($code)
+    {
         //countries_iso_code_2
         $country = tep_db_fetch_array(tep_db_query("select * from " . TABLE_COUNTRIES . " where countries_iso_code_2 = '" . $code . "'"));
         return $country;
     }
 
-    function get_hash($order_id, $customer_id) {
+    function get_hash($order_id, $customer_id)
+    {
         return md5($order_id . $customer_id);
     }
 
-    function _get_error_message($code) {
-        if (is_numeric($code)) {
+    function _get_error_message($code)
+    {
+        if (is_numeric($code))
+        {
             $message = constant(sprintf("MODULE_PAYMENT_MULTISAFEPAY_FCO_TEXT_ERROR_%04d", $code));
 
-            if (!$message) {
+            if (!$message)
+            {
                 $message = MODULE_PAYMENT_MULTISAFEPAY_FCO_TEXT_ERROR_UNKNOWN;
             }
-        } else {
+        } else
+        {
             $const = sprintf("MODULE_PAYMENT_MULTISAFEPAY_FCO_TEXT_ERROR_%s", strtoupper($code));
 
-            if (defined($const)) {
+            if (defined($const))
+            {
                 $message = constant($const);
-            } else {
+            } else
+            {
                 $message = $code;
             }
         }
         return $message;
     }
 
-    function _error_redirect($error) {
+    function _error_redirect($error)
+    {
         tep_redirect($this->_href_link(
                         FILENAME_SHOPPING_CART, 'payment_error=' . $this->code . '&error=' . $error, 'NONSSL', true, false, false
         ));
@@ -1097,24 +1228,28 @@ class multisafepay_fastcheckout {
     /*
      * Store the order in the database, and set $this->order_id
      */
-    function _save_order() {
+    function _save_order()
+    {
         global $customer_id;
         global $languages_id;
         global $order;
         global $order_totals;
         global $order_products_id;
 
-        if (empty($order_totals)) {
+        if (empty($order_totals))
+        {
             require(DIR_WS_CLASSES . 'order_total.php');
             $order_total_modules = new order_total();
             $order_totals = $order_total_modules->process();
         }
 
-        if (!empty($this->order_id) && $this->order_id > 0) {
+        if (!empty($this->order_id) && $this->order_id > 0)
+        {
             return;
         }
 
-        if (MODULE_PAYMENT_MULTISAFEPAY_FCO_DISPLAY_CHECKOUT_ORDERS == 'False') {
+        if (MODULE_PAYMENT_MULTISAFEPAY_FCO_DISPLAY_CHECKOUT_ORDERS == 'False')
+        {
             $order->info['order_status'] = 0;
         }
 
@@ -1165,7 +1300,8 @@ class multisafepay_fastcheckout {
 
         tep_db_perform(TABLE_ORDERS, $sql_data_array);
         $insert_id = tep_db_insert_id();
-        for ($i = 0, $n = sizeof($order_totals); $i < $n; $i++) {
+        for ($i = 0, $n = sizeof($order_totals); $i < $n; $i++)
+        {
             $sql_data_array = array('orders_id' => $insert_id,
                 'title' => $order_totals[$i]['title'],
                 'text' => $order_totals[$i]['text'],
@@ -1182,10 +1318,13 @@ class multisafepay_fastcheckout {
             'comments' => $order->info['comments']);
         tep_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
 
-        for ($i = 0, $n = sizeof($order->products); $i < $n; $i++) {
+        for ($i = 0, $n = sizeof($order->products); $i < $n; $i++)
+        {
             // Stock Update - Joao Correia
-            if (STOCK_LIMITED == 'true') {
-                if (DOWNLOAD_ENABLED == 'true') {
+            if (STOCK_LIMITED == 'true')
+            {
+                if (DOWNLOAD_ENABLED == 'true')
+                {
                     $stock_query_raw = "SELECT products_quantity, pad.products_attributes_filename
 										FROM " . TABLE_PRODUCTS . " p
 										LEFT JOIN " . TABLE_PRODUCTS_ATTRIBUTES . " pa
@@ -1196,23 +1335,29 @@ class multisafepay_fastcheckout {
                     // Will work with only one option for downloadable products
                     // otherwise, we have to build the query dynamically with a loop
                     $products_attributes = $order->products[$i]['attributes'];
-                    if (is_array($products_attributes)) {
+                    if (is_array($products_attributes))
+                    {
                         $stock_query_raw .= " AND pa.options_id = '" . $products_attributes[0]['option_id'] . "' AND pa.options_values_id = '" . $products_attributes[0]['value_id'] . "'";
                     }
                     $stock_query = tep_db_query($stock_query_raw);
-                } else {
+                } else
+                {
                     $stock_query = tep_db_query("select products_quantity from " . TABLE_PRODUCTS . " where products_id = '" . tep_get_prid($order->products[$i]['id']) . "'");
                 }
-                if (tep_db_num_rows($stock_query) > 0) {
+                if (tep_db_num_rows($stock_query) > 0)
+                {
                     $stock_values = tep_db_fetch_array($stock_query);
                     // do not decrement quantities if products_attributes_filename exists
-                    if ((DOWNLOAD_ENABLED != 'true') || (!$stock_values['products_attributes_filename'])) {
+                    if ((DOWNLOAD_ENABLED != 'true') || (!$stock_values['products_attributes_filename']))
+                    {
                         $stock_left = $stock_values['products_quantity'] - $order->products[$i]['qty'];
-                    } else {
+                    } else
+                    {
                         $stock_left = $stock_values['products_quantity'];
                     }
                     tep_db_query("update " . TABLE_PRODUCTS . " set products_quantity = '" . $stock_left . "' where products_id = '" . tep_get_prid($order->products[$i]['id']) . "'");
-                    if (($stock_left < 1) && (STOCK_ALLOW_CHECKOUT == 'false')) {
+                    if (($stock_left < 1) && (STOCK_ALLOW_CHECKOUT == 'false'))
+                    {
                         tep_db_query("update " . TABLE_PRODUCTS . " set products_status = '0' where products_id = '" . tep_get_prid($order->products[$i]['id']) . "'");
                     }
                 }
@@ -1235,10 +1380,13 @@ class multisafepay_fastcheckout {
             //------insert customer choosen option to order--------
             $attributes_exist = '0';
             $products_ordered_attributes = '';
-            if (isset($order->products[$i]['attributes'])) {
+            if (isset($order->products[$i]['attributes']))
+            {
                 $attributes_exist = '1';
-                for ($j = 0, $n2 = sizeof($order->products[$i]['attributes']); $j < $n2; $j++) {
-                    if (DOWNLOAD_ENABLED == 'true') {
+                for ($j = 0, $n2 = sizeof($order->products[$i]['attributes']); $j < $n2; $j++)
+                {
+                    if (DOWNLOAD_ENABLED == 'true')
+                    {
                         $attributes_query = "select popt.products_options_name, poval.products_options_values_name, pa.options_values_price, pa.price_prefix, pad.products_attributes_maxdays, pad.products_attributes_maxcount , pad.products_attributes_filename
 										   from " . TABLE_PRODUCTS_OPTIONS . " popt, " . TABLE_PRODUCTS_OPTIONS_VALUES . " poval, " . TABLE_PRODUCTS_ATTRIBUTES . " pa
 										   left join " . TABLE_PRODUCTS_ATTRIBUTES_DOWNLOAD . " pad
@@ -1251,7 +1399,8 @@ class multisafepay_fastcheckout {
 											and popt.language_id = '" . $languages_id . "'
 											and poval.language_id = '" . $languages_id . "'";
                         $attributes = tep_db_query($attributes_query);
-                    } else {
+                    } else
+                    {
                         $attributes = tep_db_query("select popt.products_options_name, poval.products_options_values_name, pa.options_values_price, pa.price_prefix from " . TABLE_PRODUCTS_OPTIONS . " popt, " . TABLE_PRODUCTS_OPTIONS_VALUES . " poval, " . TABLE_PRODUCTS_ATTRIBUTES . " pa where pa.products_id = '" . $order->products[$i]['id'] . "' and pa.options_id = '" . $order->products[$i]['attributes'][$j]['option_id'] . "' and pa.options_id = popt.products_options_id and pa.options_values_id = '" . $order->products[$i]['attributes'][$j]['value_id'] . "' and pa.options_values_id = poval.products_options_values_id and popt.language_id = '" . $languages_id . "' and poval.language_id = '" . $languages_id . "'");
                     }
                     $attributes_values = tep_db_fetch_array($attributes);
@@ -1264,7 +1413,8 @@ class multisafepay_fastcheckout {
                         'price_prefix' => $attributes_values['price_prefix']);
                     tep_db_perform(TABLE_ORDERS_PRODUCTS_ATTRIBUTES, $sql_data_array);
 
-                    if ((DOWNLOAD_ENABLED == 'true') && isset($attributes_values['products_attributes_filename']) && tep_not_null($attributes_values['products_attributes_filename'])) {
+                    if ((DOWNLOAD_ENABLED == 'true') && isset($attributes_values['products_attributes_filename']) && tep_not_null($attributes_values['products_attributes_filename']))
+                    {
                         $sql_data_array = array('orders_id' => $insert_id,
                             'orders_products_id' => $order_products_id,
                             'orders_products_filename' => $attributes_values['products_attributes_filename'],
@@ -1279,7 +1429,8 @@ class multisafepay_fastcheckout {
         $this->order_id = $insert_id;
     }
 
-    function _notify_customer($new_order_status = null) {
+    function _notify_customer($new_order_status = null)
+    {
         global $customer_id;
         global $order;
         global $order_totals;
@@ -1290,7 +1441,8 @@ class multisafepay_fastcheckout {
         global $currencies;
         global $payment;
 
-        if ($new_order_status != null) {
+        if ($new_order_status != null)
+        {
 
             $order->info['order_status'] = $new_order_status;
         }
@@ -1309,15 +1461,20 @@ class multisafepay_fastcheckout {
         $total_tax = 0;
         $total_cost = 0;
 
-        for ($i = 0, $n = sizeof($order->products); $i < $n; $i++) {
+        for ($i = 0, $n = sizeof($order->products); $i < $n; $i++)
+        {
             //------insert customer choosen option to order--------
             $attributes_exist = '0';
             $products_ordered_attributes = '';
-            if (isset($order->products[$i]['attributes'])) {
+            if (isset($order->products[$i]['attributes']))
+            {
                 $attributes_exist = '1';
-                for ($j = 0, $n2 = sizeof($order->products[$i]['attributes']); $j < $n2; $j++) {
-                    if (isset($order->products[$i]['attributes'][$j]['option_id'])) {
-                        if (DOWNLOAD_ENABLED == 'true') {
+                for ($j = 0, $n2 = sizeof($order->products[$i]['attributes']); $j < $n2; $j++)
+                {
+                    if (isset($order->products[$i]['attributes'][$j]['option_id']))
+                    {
+                        if (DOWNLOAD_ENABLED == 'true')
+                        {
                             $attributes_query = "select popt.products_options_name, poval.products_options_values_name, pa.options_values_price, pa.price_prefix, pad.products_attributes_maxdays, pad.products_attributes_maxcount , pad.products_attributes_filename
 													from " . TABLE_PRODUCTS_OPTIONS . " popt, " . TABLE_PRODUCTS_OPTIONS_VALUES . " poval, " . TABLE_PRODUCTS_ATTRIBUTES . " pa
 													left join " . TABLE_PRODUCTS_ATTRIBUTES_DOWNLOAD . " pad
@@ -1329,7 +1486,8 @@ class multisafepay_fastcheckout {
 													and pa.options_values_id = poval.products_options_values_id
 													and popt.language_id = '" . $languages_id . "'
 													and poval.language_id = '" . $languages_id . "'";
-                        } else {
+                        } else
+                        {
                             $attributes_query = "select popt.products_options_name, poval.products_options_values_name, pa.options_values_price, pa.price_prefix
 													from " . TABLE_PRODUCTS_OPTIONS . " popt, " . TABLE_PRODUCTS_OPTIONS_VALUES . " poval, " . TABLE_PRODUCTS_ATTRIBUTES . " pa
 													where pa.products_id = '" . $order->products[$i]['id'] . "'
@@ -1341,7 +1499,8 @@ class multisafepay_fastcheckout {
 
                         $attributes = tep_db_query($attributes_query);
                         $attributes_values = tep_db_fetch_array($attributes);
-                    } else {
+                    } else
+                    {
                         $attributes_values = array();
                         $attributes_values['products_options_name'] = $order->products[$i]['attributes'][$j]['option'];
                         $attributes_values['products_options_values_name'] = $order->products[$i]['attributes'][$j]['value'];
@@ -1357,7 +1516,8 @@ class multisafepay_fastcheckout {
                         'price_prefix' => $attributes_values['price_prefix']);
                     tep_db_perform(TABLE_ORDERS_PRODUCTS_ATTRIBUTES, $sql_data_array);
 
-                    if ((DOWNLOAD_ENABLED == 'true') && isset($attributes_values['products_attributes_filename']) && tep_not_null($attributes_values['products_attributes_filename'])) {
+                    if ((DOWNLOAD_ENABLED == 'true') && isset($attributes_values['products_attributes_filename']) && tep_not_null($attributes_values['products_attributes_filename']))
+                    {
                         $sql_data_array = array('orders_id' => $this->order_id,
                             'orders_products_id' => $order_products_id,
                             'orders_products_filename' => $attributes_values['products_attributes_filename'],
@@ -1384,7 +1544,8 @@ class multisafepay_fastcheckout {
                 EMAIL_TEXT_ORDER_NUMBER . ' ' . $this->order_id . "\n" .
                 EMAIL_TEXT_INVOICE_URL . ' ' . $this->_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'order_id=' . $this->order_id, 'SSL', false) . "\n" .
                 EMAIL_TEXT_DATE_ORDERED . ' ' . strftime(DATE_FORMAT_LONG) . "\n\n";
-        if ($order->info['comments']) {
+        if ($order->info['comments'])
+        {
             $email_order .= tep_db_output($order->info['comments']) . "\n\n";
         }
         $email_order .= EMAIL_TEXT_PRODUCTS . "\n" .
@@ -1392,11 +1553,13 @@ class multisafepay_fastcheckout {
                 $products_ordered .
                 EMAIL_SEPARATOR . "\n";
 
-        for ($i = 0, $n = sizeof($order_totals); $i < $n; $i++) {
+        for ($i = 0, $n = sizeof($order_totals); $i < $n; $i++)
+        {
             $email_order .= strip_tags($order_totals[$i]['title']) . ' ' . strip_tags($order_totals[$i]['text']) . "\n";
         }
 
-        if ($order->content_type != 'virtual') {
+        if ($order->content_type != 'virtual')
+        {
             $email_order .= "\n" . EMAIL_TEXT_DELIVERY_ADDRESS . "\n" .
                     EMAIL_SEPARATOR . "\n" .
                     $this->_address_format($order->delivery['format_id'], $order->delivery, 0, '', "\n") . "\n";
@@ -1406,16 +1569,20 @@ class multisafepay_fastcheckout {
                 EMAIL_SEPARATOR . "\n" .
                 $this->_address_format($order->billing['format_id'], $order->billing, 0, '', "\n") . "\n\n";
 
-        if (is_object($$payment)) {
+        if (is_object($$payment))
+        {
             $email_order .= EMAIL_TEXT_PAYMENT_METHOD . "\n" .
                     EMAIL_SEPARATOR . "\n";
             $payment_class = $$payment;
-            if (!empty($order->info['payment_method'])) {
+            if (!empty($order->info['payment_method']))
+            {
                 $email_order .= $order->info['payment_method'] . "\n\n";
-            } else {
+            } else
+            {
                 $email_order .= $payment_class->title . "\n\n";
             }
-            if ($payment_class->email_footer) {
+            if ($payment_class->email_footer)
+            {
                 $email_order .= $payment_class->email_footer . "\n\n";
             }
         }
@@ -1426,25 +1593,30 @@ class multisafepay_fastcheckout {
         tep_mail($order->customer['firstname'] . ' ' . $order->customer['lastname'], $order->customer['email_address'], EMAIL_TEXT_SUBJECT, $email_order, STORE_OWNER, STORE_OWNER_EMAIL_ADDRESS);
 
         // send emails to other people
-        if (SEND_EXTRA_ORDER_EMAILS_TO != '') {
+        if (SEND_EXTRA_ORDER_EMAILS_TO != '')
+        {
             tep_mail('', SEND_EXTRA_ORDER_EMAILS_TO, EMAIL_TEXT_SUBJECT, $email_order, STORE_OWNER, STORE_OWNER_EMAIL_ADDRESS);
         }
     }
 
     // ---- Ripped from includes/functions/general.php ----
 
-    function _address_format($address_format_id, $address, $html, $boln, $eoln) {
+    function _address_format($address_format_id, $address, $html, $boln, $eoln)
+    {
         $address_format_query = tep_db_query("SELECT address_format AS format FROM " . TABLE_ADDRESS_FORMAT . " WHERE address_format_id = '" . (int) $address_format_id . "'");
         $address_format = tep_db_fetch_array($address_format_query);
 
         $company = $this->_output_string_protected($address['company']);
-        if (isset($address['firstname']) && tep_not_null($address['firstname'])) {
+        if (isset($address['firstname']) && tep_not_null($address['firstname']))
+        {
             $firstname = $this->_output_string_protected($address['firstname']);
             $lastname = $this->_output_string_protected($address['lastname']);
-        } elseif (isset($address['name']) && tep_not_null($address['name'])) {
+        } elseif (isset($address['name']) && tep_not_null($address['name']))
+        {
             $firstname = $this->_output_string_protected($address['name']);
             $lastname = '';
-        } else {
+        } else
+        {
             $firstname = '';
             $lastname = '';
         }
@@ -1454,38 +1626,48 @@ class multisafepay_fastcheckout {
         $city = $this->_output_string_protected($address['city']);
         $state = $this->_output_string_protected($address['state']);
 
-        if (isset($address['country_id']) && tep_not_null($address['country_id'])) {
+        if (isset($address['country_id']) && tep_not_null($address['country_id']))
+        {
             $country = tep_get_country_name($address['country_id']);
 
-            if (isset($address['zone_id']) && tep_not_null($address['zone_id'])) {
+            if (isset($address['zone_id']) && tep_not_null($address['zone_id']))
+            {
                 $state = tep_get_zone_code($address['country_id'], $address['zone_id'], $state);
             }
-        } elseif (isset($address['country']) && tep_not_null($address['country'])) {
-            if (is_array($address['country'])) {
+        } elseif (isset($address['country']) && tep_not_null($address['country']))
+        {
+            if (is_array($address['country']))
+            {
                 $country = $this->_output_string_protected($address['country']['title']);
-            } else {
+            } else
+            {
                 $country = $this->_output_string_protected($address['country']);
             }
-        } else {
+        } else
+        {
             $country = '';
         }
 
         $postcode = $this->_output_string_protected($address['postcode']);
         $zip = $postcode;
 
-        if ($html) {
+        if ($html)
+        {
             // HTML Mode
             $HR = '<hr>';
             $hr = '<hr>';
-            if (($boln == '') && ($eoln == "\n")) { // Values not specified, use rational defaults
+            if (($boln == '') && ($eoln == "\n"))
+            { // Values not specified, use rational defaults
                 $CR = '<br>';
                 $cr = '<br>';
                 $eoln = $cr;
-            } else { // Use values supplied
+            } else
+            { // Use values supplied
                 $CR = $eoln . $boln;
                 $cr = $CR;
             }
-        } else {
+        } else
+        {
             // Text Mode
             $CR = $eoln;
             $cr = $CR;
@@ -1503,61 +1685,80 @@ class multisafepay_fastcheckout {
         $fmt = $address_format['format'];
         eval("\$address = \"$fmt\";");
 
-        if ((ACCOUNT_COMPANY == 'true') && (tep_not_null($company))) {
+        if ((ACCOUNT_COMPANY == 'true') && (tep_not_null($company)))
+        {
             $address = $company . $cr . $address;
         }
         return $address;
     }
 
-    function _output_string($string, $translate = false, $protected = false) {
-        if ($protected == true) {
+    function _output_string($string, $translate = false, $protected = false)
+    {
+        if ($protected == true)
+        {
             return htmlspecialchars($string);
-        } else {
-            if ($translate == false) {
+        } else
+        {
+            if ($translate == false)
+            {
                 return $this->_parse_input_field_data($string, array('"' => '&quot;'));
-            } else {
+            } else
+            {
                 return $this->_parse_input_field_data($string, $translate);
             }
         }
     }
 
-    function _output_string_protected($string) {
+    function _output_string_protected($string)
+    {
         return $this->_output_string($string, false, true);
     }
 
-    function _parse_input_field_data($data, $parse) {
+    function _parse_input_field_data($data, $parse)
+    {
         return strtr(trim($data), $parse);
     }
 
-    function _href_link($page = '', $parameters = '', $connection = 'NONSSL', $add_session_id = true, $unused = true, $escape_html = true) {
+    function _href_link($page = '', $parameters = '', $connection = 'NONSSL', $add_session_id = true, $unused = true, $escape_html = true)
+    {
         global $request_type, $session_started, $SID;
 
         unset($unused);
 
-        if (!tep_not_null($page)) {
+        if (!tep_not_null($page))
+        {
             die('</td></tr></table></td></tr></table><br><br><font color="#ff0000"><b>Error!</b></font><br><br><b>Unable to determine the page link!<br><br>');
         }
 
-        if ($connection == 'NONSSL') {
+        if ($connection == 'NONSSL')
+        {
             $link = HTTP_SERVER . DIR_WS_HTTP_CATALOG;
-        } elseif ($connection == 'SSL') {
-            if (ENABLE_SSL == true) {
+        } elseif ($connection == 'SSL')
+        {
+            if (ENABLE_SSL == true)
+            {
                 $link = HTTPS_SERVER . DIR_WS_HTTPS_CATALOG;
-            } else {
+            } else
+            {
                 $link = HTTP_SERVER . DIR_WS_HTTP_CATALOG;
             }
-        } else {
+        } else
+        {
             die('</td></tr></table></td></tr></table><br><br><font color="#ff0000"><b>Error!</b></font><br><br><b>Unable to determine connection method on a link!<br><br>Known methods: NONSSL SSL</b><br><br>');
         }
 
-        if (tep_not_null($parameters)) {
-            if ($escape_html) {
+        if (tep_not_null($parameters))
+        {
+            if ($escape_html)
+            {
                 $link .= $page . '?' . $this->_output_string($parameters);
-            } else {
+            } else
+            {
                 $link .= $page . '?' . $parameters;
             }
             $separator = '&';
-        } else {
+        } else
+        {
             $link .= $page;
             $separator = '?';
         }
@@ -1566,20 +1767,27 @@ class multisafepay_fastcheckout {
             $link = substr($link, 0, -1);
 
         // Add the session ID when moving from different HTTP and HTTPS servers, or when SID is defined
-        if (($add_session_id == true) && ($session_started == true) && (SESSION_FORCE_COOKIE_USE == 'False')) {
-            if (tep_not_null($SID)) {
+        if (($add_session_id == true) && ($session_started == true) && (SESSION_FORCE_COOKIE_USE == 'False'))
+        {
+            if (tep_not_null($SID))
+            {
                 $_sid = $SID;
-            } elseif (( ($request_type == 'NONSSL') && ($connection == 'SSL') && (ENABLE_SSL == true) ) || ( ($request_type == 'SSL') && ($connection == 'NONSSL') )) {
-                if (HTTP_COOKIE_DOMAIN != HTTPS_COOKIE_DOMAIN) {
+            } elseif (( ($request_type == 'NONSSL') && ($connection == 'SSL') && (ENABLE_SSL == true) ) || ( ($request_type == 'SSL') && ($connection == 'NONSSL') ))
+            {
+                if (HTTP_COOKIE_DOMAIN != HTTPS_COOKIE_DOMAIN)
+                {
                     $_sid = tep_session_name() . '=' . tep_session_id();
                 }
             }
         }
 
-        if (isset($_sid)) {
-            if ($escape_html) {
+        if (isset($_sid))
+        {
+            if ($escape_html)
+            {
                 $link .= $separator . $this->_output_string($_sid);
-            } else {
+            } else
+            {
                 $link .= $separator . $_sid;
             }
         }
@@ -1591,8 +1799,10 @@ class multisafepay_fastcheckout {
     /*
      * Checks whether the payment has been “installed” through the admin panel
      */
-    function check() {
-        if (!isset($this->_check)) {
+    function check()
+    {
+        if (!isset($this->_check))
+        {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MULTISAFEPAY_FCO_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
@@ -1603,7 +1813,8 @@ class multisafepay_fastcheckout {
      * Installs the configuration keys into the database
      */
 
-    function install() {
+    function install()
+    {
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('MultiSafepay enabled', 'MODULE_PAYMENT_MULTISAFEPAY_FCO_STATUS', 'True', 'Enable MultiSafepay payments for this website', '6', '20', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('Type account', 'MODULE_PAYMENT_MULTISAFEPAY_FCO_API_SERVER', 'Live account', '<a href=\'http://www.multisafepay.com/nl/klantenservice-zakelijk/open-een-testaccount.html\' target=\'_blank\' style=\'text-decoration: underline; font-weight: bold; color:#696916; \'>Sign up for a free test account!</a>', '6', '21', 'tep_cfg_select_option(array(\'Live account\', \'Test account\'), ', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('Account ID', 'MODULE_PAYMENT_MULTISAFEPAY_FCO_ACCOUNT_ID', '', 'Your merchant account ID', '6', '22', now())");
@@ -1644,7 +1855,8 @@ class multisafepay_fastcheckout {
      * Removes the configuration keys from the database
      */
 
-    function remove() {
+    function remove()
+    {
         tep_db_query("DELETE FROM " . TABLE_CONFIGURATION . " WHERE configuration_key IN ('" . implode("', '", $this->keys()) . "')");
     }
 
@@ -1653,7 +1865,8 @@ class multisafepay_fastcheckout {
      * the payment module
      */
 
-    function keys() {
+    function keys()
+    {
         return array(
             'MODULE_PAYMENT_MULTISAFEPAY_FCO_STATUS',
             'MODULE_PAYMENT_MULTISAFEPAY_FCO_API_SERVER',
@@ -1692,8 +1905,10 @@ class multisafepay_fastcheckout {
         );
     }
 
-    function getlocale($lang) {
-        switch ($lang) {
+    function getlocale($lang)
+    {
+        switch ($lang)
+        {
             case "dutch":
                 $lang = 'nl_NL';
                 break;
@@ -1716,17 +1931,21 @@ class multisafepay_fastcheckout {
         return $lang;
     }
 
-    function getcountry($country) {
-        if (empty($country)) {
+    function getcountry($country)
+    {
+        if (empty($country))
+        {
             $langcode = explode(";", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
             $langcode = explode(",", $langcode['0']);
             return strtoupper($langcode['1']);
-        } else {
+        } else
+        {
             return strtoupper($country);
         }
     }
 
-    function getAgreementField($msp) {
+    function getAgreementField($msp)
+    {
         $field = new MspCustomField('acceptagreements', 'checkbox', '');
 
         // description
@@ -1749,79 +1968,93 @@ class multisafepay_fastcheckout {
         $msp->fields->AddField($field);
     }
 
-    function getCustomFields($msp) {
-        if ('Yes' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_AGREEMENTS) {
+    function getCustomFields($msp)
+    {
+        if ('Yes' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_AGREEMENTS)
+        {
             $this->getAgreementField($msp);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_COMPANY) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_COMPANY)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('companyname', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_COMPANY);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_SALUTATION) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_SALUTATION)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('salutation', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_SALUTATION);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_SEX) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_SEX)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('sex', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_SEX);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_COMMENT) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_COMMENT)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('comment', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_COMMENT);
             $msp->fields->AddField($field);
         }
 
         //checkbox
-        if ('Yes' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_NEWSLETTER) {
+        if ('Yes' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_NEWSLETTER)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('newsletter', 1);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_VAT) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_VAT)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('vatnumber', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_VAT);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_BIRTHDAY) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_BIRTHDAY)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('birthday', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_BIRTHDAY);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_CHAMBER) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_CHAMBER)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('chamberofcommerce', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_CHAMBER);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_PASSPORT) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_PASSPORT)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('passportnumber', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_PASSPORT);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_DRIVERS) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_DRIVERS)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('driverslicense', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_DRIVERS);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_PHONE) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_PHONE)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('phonenumber', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_PHONE);
             $msp->fields->AddField($field);
         }
 
-        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_MOBILE) {
+        if ('Disabled' != MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_MOBILE)
+        {
             $field = new MspCustomField();
             $field->SetStandardField('mobilephonenumber', 'Optional' == MODULE_PAYMENT_MULTISAFEPAY_FCO_FLD_MOBILE);
             $msp->fields->AddField($field);

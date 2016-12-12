@@ -1,7 +1,7 @@
 <?php
 
 require( "multisafepay.php" );
-
+ 
 class multisafepay_lief extends multisafepay {
 
     var $icon = "lief.png";
@@ -14,9 +14,9 @@ class multisafepay_lief extends multisafepay {
     function multisafepay_lief() {
         global $order;
         $this->code = 'multisafepay_lief';
-        $this->title = $this->getTitle('LIEF');
-        $this->public_title = $this->getTitle('LIEF');
-        $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay LIEF</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
+        $this->title = $this->getTitle('Lief kadokaart');
+        $this->public_title = $this->getTitle('Lief! cadeaukaart');
+        $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay Lief! kadokaart</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
         $this->enabled = MODULE_PAYMENT_MSP_LIEF_STATUS == 'True';
         $this->sort_order = MODULE_PAYMENT_MSP_LIEF_SORT_ORDER;
 

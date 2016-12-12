@@ -1,13 +1,4 @@
 <?php
-/*
-
-MultiSafepay Payment Module for osCommerce 1.10
-http://www.multisafepay.com
-
-Copyright (C) 2008 MultiSafepay.com
-Copyright (C) 2008 Privateer Software Development
-
-*/
 
 define('MODULE_PAYMENT_MULTISAFEPAY_FCO_LOCALE',                'en');
 

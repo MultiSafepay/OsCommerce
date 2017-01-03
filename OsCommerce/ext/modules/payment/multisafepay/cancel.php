@@ -19,14 +19,11 @@ $order->info['order_status'] = $order_status['orders_status_id'];
 require(DIR_WS_CLASSES . "order_total.php");
 $order_total_modules = new order_total();
 
-// set some globals (expected by osCommerce)
 $customer_id = $order->customer['id'];
 $order_totals = $order->totals;
 
-// update order status
 $payment_module->order_id = $_GET['transactionid'];
 $transdata = $payment_module->checkout_notify();
-
 
 tep_redirect($payment_module->_href_link('checkout_payment.php', '', 'SSL', false, false));
 ?>

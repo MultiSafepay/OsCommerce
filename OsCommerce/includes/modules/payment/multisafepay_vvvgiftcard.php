@@ -4,7 +4,7 @@ require( "multisafepay.php" );
 
 class multisafepay_vvvgiftcard extends multisafepay {
 
-    var $icon = "sportnfit.png";
+    var $icon = "vvvgiftcard.png";
 
     /*
      * Constructor

@@ -1,12 +1,5 @@
 <?php
 
-/*
-  MultiSafepay Payment Module for osCommerce 
-  http://www.multisafepay.com
-
-  Copyright (C) 2008 MultiSafepay.com
- */
-
 chdir("../../../../");
 require("includes/application_top.php");
 include(DIR_WS_LANGUAGES . $language . '/' . FILENAME_CHECKOUT_PROCESS);
@@ -31,13 +24,14 @@ if (empty($_GET['transactionid'])) {
     $order_status = tep_db_fetch_array($order_status_query);
     $order->info['order_status'] = $order_status['orders_status_id'];
 
-    //require(DIR_WS_CLASSES . "order_total.php");
-    //$order_total_modules = new order_total();
-    // set some globals (expected by osCommerce)
+    require(DIR_WS_CLASSES . "order_total.php");
+    $order_total_modules = new order_total();
+    
+    //Set some globals (expected by osCommerce)
     $customer_id = $order->customer['id'];
     $order_totals = $order->totals;
 
-    // update order status
+    //Update order status
     $payment_module->order_id = $_GET['transactionid'];
     $status = $payment_module->update_order();
 

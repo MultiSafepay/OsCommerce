@@ -68,8 +68,7 @@ class Client {
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $http_body);
         }
-        //mail('sonny.danso@multisafepay.com', 'test', print_r($http_body, true));
-        //var_dump($http_body);exit;
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($ch, CURLOPT_ENCODING, "");
@@ -80,7 +79,7 @@ class Client {
         curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
         
         $body = curl_exec($ch);
-
+        //mail('sonny@multisafepay.com', 'test', print_r($http_body, true));
         if ($this->debug)
         {
             $this->request = $http_body;

@@ -19,9 +19,7 @@ if (empty($_GET['transactionid']))
 {
     $message = "No transaction ID supplied";
     $url = tep_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error=' . $payment_module->code . '&error=' . urlencode($message), 'NONSSL', true, false);
-} else
-{
-    // load selected payment module
+} else {    
     require(DIR_WS_CLASSES . "payment.php");
     $payment_modules = new payment("multisafepay");
     $payment_module = $GLOBALS[$payment_modules->selected_module];
@@ -35,20 +33,17 @@ if (empty($_GET['transactionid']))
 
     require(DIR_WS_CLASSES . "order_total.php");
     $order_total_modules = new order_total();
-
-    // set some globals (expected by osCommerce)
+    
     $customer_id = $order->customer['id'];
     $order_totals = $order->totals;
-
-    // update order status
+    
     $payment_module->order_id = $_GET['transactionid'];
     $transdata = $payment_module->check_transaction();
-
+    
     if ($transdata->fastcheckout == 'NO')
     {
         $status = $payment_module->checkout_notify();
-    } else
-    {
+    } else {
         $payment_modules = new payment("multisafepay_fastcheckout");
         $payment_module = $GLOBALS[$payment_modules->selected_module];
         $status = $payment_module->checkout_notify();
@@ -76,8 +71,7 @@ if (empty($_GET['transactionid']))
 if ($initial_request)
 {
     echo "<p><a href=\"" . $url . "\">" . sprintf(MODULE_PAYMENT_MULTISAFEPAY_TEXT_RETURN_TO_SHOP, htmlspecialchars(STORE_NAME)) . "</a></p>";
-} else
-{
+} else {
     header("Content-type: text/plain");
     echo $message;
 }

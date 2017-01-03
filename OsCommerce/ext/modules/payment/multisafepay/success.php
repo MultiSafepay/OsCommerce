@@ -5,7 +5,6 @@ require("includes/application_top.php");
 define('DIR_WS_LANGUAGES', 'includes/languages/');
 define('FILENAME_CHECKOUT_PROCESS', 'checkout_process.php');
 define('FILENAME_CHECKOUT_SUCCESS', 'checkout_success.php');
-
 include(DIR_WS_LANGUAGES . $language . '/' . FILENAME_CHECKOUT_PROCESS);
 
 if ($multisafepay_order_id && $_GET['customer_id'] && $_GET['hash'])
@@ -41,10 +40,7 @@ if ($customer_id)
 {
     tep_session_register('customer_id');
     tep_redirect(tep_href_link(FILENAME_CHECKOUT_SUCCESS));
-} else
-{
-    //For unregistered customer success page shows empty card,
-    //so, it's better to show the index page.
-    tep_redirect(tep_href_link('index.php'));
+} else {
+    tep_redirect(tep_href_link(FILENAME_CHECKOUT_SUCCESS));
 }
 ?>

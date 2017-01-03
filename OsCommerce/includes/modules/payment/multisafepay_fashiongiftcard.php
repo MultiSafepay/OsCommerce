@@ -4,7 +4,7 @@ require( "multisafepay.php" );
 
 class multisafepay_fashiongiftcard extends multisafepay {
 
-    var $icon = "fashioncheque.png";
+    var $icon = "fashiongiftcard.png";
 
     /*
      * Constructor

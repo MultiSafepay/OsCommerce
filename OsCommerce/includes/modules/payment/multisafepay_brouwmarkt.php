@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_brouwmarkt extends multisafepay {
 
     var $icon = "brouwmarkt.png";
-    var $issuer = '';
 
     /*
      * Constructor

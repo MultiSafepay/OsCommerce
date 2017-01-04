@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_erotiekbon extends multisafepay {
 
     var $icon = "erotiekbon.png";
-    var $issuer = '';
 
     /*
      * Constructor

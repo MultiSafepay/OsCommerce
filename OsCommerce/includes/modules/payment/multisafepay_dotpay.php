@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_dotpay extends multisafepay {
 
     var $icon = "dotpay.png";
-    var $issuer = '';
 
     /*
      * Constructor

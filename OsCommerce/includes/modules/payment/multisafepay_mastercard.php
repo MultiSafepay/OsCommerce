@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_mastercard extends multisafepay {
 
     var $icon = "mastercard.png";
-    var $issuer = '';
 
     /*
      * Constructor

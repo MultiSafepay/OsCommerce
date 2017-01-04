@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_banktrans extends multisafepay {
 
     var $icon = "banktrans.png";
-    var $issuer = '';
 
     /*
      * Constructor

@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_bloemencadeau extends multisafepay {
 
     var $icon = "bloemencadeau.png";
-    var $issuer = '';
 
     /*
      * Constructor

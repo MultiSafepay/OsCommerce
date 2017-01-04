@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_eps extends multisafepay {
 
     var $icon = "eps.png";
-    var $issuer = '';
 
     /*
      * Constructor

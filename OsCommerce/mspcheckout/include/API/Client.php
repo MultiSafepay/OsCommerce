@@ -79,7 +79,6 @@ class Client {
         curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
         
         $body = curl_exec($ch);
-        //mail('sonny@multisafepay.com', 'test', print_r($http_body, true));
         if ($this->debug)
         {
             $this->request = $http_body;

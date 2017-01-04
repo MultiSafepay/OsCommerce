@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_dirdeb extends multisafepay {
 
     var $icon = "dirdeb.png";
-    var $issuer = '';
 
     /*
      * Constructor

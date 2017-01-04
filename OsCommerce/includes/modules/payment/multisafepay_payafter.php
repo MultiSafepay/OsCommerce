@@ -580,7 +580,7 @@ class multisafepay_payafter {
                     )
                 )
             );
-        }
+        }    
 
         foreach ($GLOBALS['order']->products as $product)
         {

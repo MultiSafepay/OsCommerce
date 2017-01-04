@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_lief extends multisafepay {
 
     var $icon = "lief.png";
-    var $issuer = '';
 
     /*
      * Constructor

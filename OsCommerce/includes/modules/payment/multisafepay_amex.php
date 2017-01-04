@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_amex extends multisafepay {
 
     var $icon = "amex.png";
-    var $issuer = '';
 
     /*
      * Constructor

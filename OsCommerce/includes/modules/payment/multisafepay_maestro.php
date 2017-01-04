@@ -5,7 +5,6 @@ require( "multisafepay.php" );
 class multisafepay_maestro extends multisafepay {
 
     var $icon = "maestro.png";
-    var $issuer = '';
 
     /*
      * Constructor

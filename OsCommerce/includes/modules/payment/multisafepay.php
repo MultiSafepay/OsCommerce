@@ -37,7 +37,6 @@ if (!class_exists('multisafepay'))
 
             $this->code = 'multisafepay';
             $this->title = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_TEXT_TITLE);
-            //$this->description = MODULE_PAYMENT_MULTISAFEPAY_TEXT_DESCRIPTION;
             $this->enabled = MODULE_PAYMENT_MULTISAFEPAY_STATUS == 'True';
             $this->sort_order = MODULE_PAYMENT_MULTISAFEPAY_SORT_ORDER;
             $this->plugin_name = $this->pluginversion . '(' . PROJECT_VERSION . ')';
@@ -123,7 +122,6 @@ if (!class_exists('multisafepay'))
          * 
          * @return boolean
          */
-        //verify
         function pre_confirmation_check()
         {
             $gatewaytest = $_POST['payment'];
@@ -143,8 +141,6 @@ if (!class_exists('multisafepay'))
          * @global type $order
          * @return boolean
          */
-        //verify
-
         function confirmation()
         {
             global $HTTP_POST_VARS, $order;
@@ -158,15 +154,7 @@ if (!class_exists('multisafepay'))
          */
         function process_button()
         {
-            if (MODULE_PAYMENT_MULTISAFEPAY_GATEWAY_SELECTION == 'True')
-            {
-                //$_POST['payment'] ?
-                $fields = tep_draw_hidden_field('multisafepay_gateway_selection', $_POST['multisafepay_gateway_selection']);
-                return $fields;
-            } else
-            {
-                return false;
-            }
+            return false;
         }
 
         function before_process()
@@ -406,11 +394,116 @@ if (!class_exists('multisafepay'))
             }
         }
 
+    /**
+     * 
+     * @param type $details
+     * @return type
+     */
+    
+        function get_customer($details)
+        {
+            $email = $details->customer->email;
+
+            //Check if the email exists
+
+            $customer_exists = tep_db_fetch_array(tep_db_query("select customers_id from " . TABLE_CUSTOMERS . " where customers_email_address = '" . $email . "'"));
+
+            $new_user = false;
+
+            if ($customer_exists['customers_id'] != '')
+            {          
+                $customer_id = $customer_exists['customers_id'];
+            } else {
+                $sql_data_array = array(
+                    'customers_firstname' => tep_db_input($details->customer->first_name),
+                    'customers_lastname' => tep_db_input($details->customer->last_name),
+                    'customers_email_address' => $details->customer->email,
+                    'customers_telephone' => $details->customer->phone1,
+                    'customers_fax' => '',
+                    'customers_default_address_id' => 0,
+                    'customers_password' => tep_encrypt_password('test123'),
+                    'customers_newsletter' => 1
+                );
+
+                if (ACCOUNT_DOB == 'true')
+                {
+                    $sql_data_array['customers_dob'] = 'now()';
+                }
+
+                tep_db_perform(TABLE_CUSTOMERS, $sql_data_array);
+
+                $customer_id = tep_db_insert_id();
+
+                tep_db_query("insert into " . TABLE_CUSTOMERS_INFO . "(customers_info_id, customers_info_number_of_logons, customers_info_date_account_created)
+                              values ('" . (int) $customer_id . "', '0', now())");
+
+                $new_user = true;
+            }
+
+            //The user exists and is logged in
+            //Check database to see whether or not the address exists.
+
+            $address_book = tep_db_query("select address_book_id, entry_country_id, entry_zone_id from " . TABLE_ADDRESS_BOOK . "
+                                                                                    where  customers_id = '" . $customer_id . "'
+                                                                                    and entry_street_address = '" . $details->customer->address1 . ' ' . $details->customer->house_number . "'
+                                                                                    and entry_suburb = '" . '' . "'
+                                                                                    and entry_postcode = '" . $details->customer->zip_code . "'
+                                                                                    and entry_city = '" . $details->customer->city . "'");
+
+            //If not, add the address as default one
+
+            if (@!tep_db_num_rows($address_book->lengths))
+            {
+                $country = $this->get_country_from_code($details->customer->country);
+
+                $sql_data_array = array(
+                    'customers_id' => $customer_id,
+                    'entry_gender' => '',
+                    'entry_company' => '',
+                    'entry_firstname' => tep_db_input($details->customer->first_name),
+                    'entry_lastname' => tep_db_input($details->customer->last_name),
+                    'entry_street_address' => $details->customer->address1 . ' ' . $details->customer->house_number,
+                    'entry_suburb' => '',
+                    'entry_postcode' => $details->customer->zip_code,
+                    'entry_city' => $details->customer->city,
+                    'entry_state' => '',
+                    'entry_country_id' => $country['countries_id'],
+                    'entry_zone_id' => ''
+                );
+
+                tep_db_perform(TABLE_ADDRESS_BOOK, $sql_data_array);
+
+                $address_id = tep_db_insert_id();
+
+                tep_db_query("update " . TABLE_CUSTOMERS . " set customers_default_address_id = '" . (int) $address_id . "' where customers_id = '" . (int) $customer_id . "'");
+
+                $customer_default_address_id = $address_id;
+                $customer_country_id = $country['countries_id'];
+            } else {
+                $customer_default_address_id = $address_book['address_book_id'];
+                $customer_country_id = $address_book['entry_country_id'];
+            }
+
+            return $customer_id;
+        }       
+
+        /**
+         * 
+         * @param type $code
+         * @return type
+         */
+        
+        function get_country_from_code($code)
+        {
+            $country = tep_db_fetch_array(tep_db_query("select * from " . TABLE_COUNTRIES . " where countries_iso_code_2 = '" . $code . "'"));
+            return $country;
+        }        
+        
+        
         /**
          * 
          * @return type
          */
-        
         function checkout_notify()
         {
             try {
@@ -426,23 +519,22 @@ if (!class_exists('multisafepay'))
 
                 $this->msp->setApiKey(MODULE_PAYMENT_MULTISAFEPAY_API_KEY);
                 $response_obj = $this->msp->issuers->get('orders', $this->order_id);
-                
             } catch (Exception $e) {
                 echo htmlspecialchars($e->getMessage());
             }
-            
+
             if (!$response_obj->var1)
             {
                 // no customer_id, so create a customer
                 $customer_id = $this->get_customer($response_obj);
-            } else {
-                //$this->resume_session($msp->details);
+            } else
+            {
                 $customer_id = $response_obj->var1;
                 //tep_session_register('customer_id');
             }
 
             $this->_customer_id = $customer_id;
-            
+
             $reset_cart = false;
             $notify_customer = false;
             $status = $response_obj->status;
@@ -613,7 +705,6 @@ if (!class_exists('multisafepay'))
          * @global type $order_products_id
          * @return type
          */
-        
         function _save_order()
         {
             global $customer_id;
@@ -1459,7 +1550,6 @@ if (!class_exists('multisafepay'))
          * 
          * @return string
          */
-        
         function checkView()
         {
             $view = "admin";
@@ -1485,7 +1575,7 @@ if (!class_exists('multisafepay'))
         function generateIcon($icon)
         {
             //return tep_image($icon, '', 60, 23, 'style="float:left;margin-right:10px;"');
-            return tep_image($icon, '', 50, 23, 'style="display:inline-block;vertical-align: middle;height:100%;margin-right:10px;"');            
+            return tep_image($icon, '', 50, 23, 'style="display:inline-block;vertical-align: middle;height:100%;margin-right:10px;"');
         }
 
         /**
@@ -1527,67 +1617,69 @@ if (!class_exists('multisafepay'))
             return "EN";
         }
 
-    /**
-     * 
-     * @param type $lang
-     * @return string
-     */
-        
-    function getLocale($lang)
-    {
-        switch ($lang)
+        /**
+         * 
+         * @param type $lang
+         * @return string
+         */
+        function getLocale($lang)
         {
-            case "dutch":
-                $lang = 'nl_NL';
-                break;
-            case "spanish":
-                $lang = 'es_ES';
-                break;
-            case "french":
-                $lang = 'fr_FR';
-                break;
-            case "german":
-                $lang = 'de_DE';
-                break;
-            case "english":
-                $lang = 'en_GB';
-                break;
-            default:
-                $lang = 'en_GB';
-                break;
-        }
-        
-        return $lang;
-    }
+            switch ($lang)
+            {
+                case "dutch":
+                    $lang = 'nl_NL';
+                    break;
+                case "spanish":
+                    $lang = 'es_ES';
+                    break;
+                case "french":
+                    $lang = 'fr_FR';
+                    break;
+                case "german":
+                    $lang = 'de_DE';
+                    break;
+                case "english":
+                    $lang = 'en_GB';
+                    break;
+                case "italian":
+                    $lang = 'it_IT';
+                    break;        
+                default:
+                    $lang = 'en_GB';
+                    break;
+            }
 
-    /**
-     * 
-     * @param type $country
-     * @return type
-     */
-    function getcountry($country)
-    {
-        if (empty($country))
-        {
-            $langcode = explode(";", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-            $langcode = explode(",", $langcode['0']);
-            return strtoupper($langcode['1']);
-        } else
-        {
-            return strtoupper($country);
+            return $lang;
         }
-    }
 
-    /**
-     * 
-     * @param type $order_id
-     * @param type $customer_id
-     * @return type
-     */
-    function get_hash($order_id, $customer_id)
-    {
-        return md5($order_id . $customer_id);
-    }
+        /**
+         * 
+         * @param type $country
+         * @return type
+         */
+        function getcountry($country)
+        {
+            if (empty($country))
+            {
+                $langcode = explode(";", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+                $langcode = explode(",", $langcode['0']);
+                return strtoupper($langcode['1']);
+            } else
+            {
+                return strtoupper($country);
+            }
+        }
+
+        /**
+         * 
+         * @param type $order_id
+         * @param type $customer_id
+         * @return type
+         */
+        function get_hash($order_id, $customer_id)
+        {
+            return md5($order_id . $customer_id);
+        }
 
     }
 

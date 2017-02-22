@@ -13,6 +13,7 @@ class multisafepay_yourgift extends multisafepay {
     function multisafepay_yourgift()
     {
         global $order;
+        
         $this->code = 'multisafepay_yourgift';
         $this->title = $this->getTitle('Yourgift');
         $this->public_title = $this->getTitle('Yourgift');
@@ -22,7 +23,9 @@ class multisafepay_yourgift extends multisafepay {
 
 
         if (is_object($order))
+        {
             $this->update_status();
+        }
     }
 
     /*
@@ -43,8 +46,7 @@ class multisafepay_yourgift extends multisafepay {
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -59,7 +61,6 @@ class multisafepay_yourgift extends multisafepay {
 
     function process_button()
     {
-
         return tep_draw_hidden_field('msp_paymentmethod', 'YOURGIFT');
     }
 
@@ -74,11 +75,12 @@ class multisafepay_yourgift extends multisafepay {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MSP_YOURGIFT_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
+        
         return $this->_check;
     }
 
-    /*
-     * Installs the configuration keys into the database
+    /**
+     * Configuration keys
      */
 
     function install()
@@ -91,7 +93,7 @@ class multisafepay_yourgift extends multisafepay {
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_YOURGIFT_STATUS',
             'MODULE_PAYMENT_MSP_YOURGIFT_SORT_ORDER',
             'MODULE_PAYMENT_MSP_YOURGIFT_ZONE',

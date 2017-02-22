@@ -1755,11 +1755,15 @@ class multisafepay_klarna {
             case "english":
                 $lang = 'en_GB';
                 break;
+            case "italian":
+            case "italiano":                    
+                $lang = 'it_IT';
+                break;        
             default:
                 $lang = 'en_GB';
                 break;
         }
-        
+
         return $lang;
     }
 

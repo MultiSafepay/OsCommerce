@@ -7,7 +7,6 @@ class multisafepay_payafter {
 
     var $code;
     var $error_response;
-    
     var $title;
     var $description;
     var $enabled;
@@ -29,7 +28,6 @@ class multisafepay_payafter {
      * @global type $order
      * @param type $order_id
      */
-
     function multisafepay_payafter($order_id = -1)
     {
         global $order;
@@ -49,13 +47,12 @@ class multisafepay_payafter {
         $this->public_title = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_TEXT_TITLE);
         $this->status = null;
     }
-           
+
     /**
      * 
      * @param type $admin
      * @return type
      */
-    
     function getTitle($admin = 'title')
     {
 
@@ -66,11 +63,12 @@ class multisafepay_payafter {
         }
 
         $title .= ($this->checkView() == "admin") ? "MultiSafepay - " : "";
-        
+
         if ($admin && $this->checkView() == "admin")
         {
             $title .= $admin;
-        } else {
+        } else
+        {
             $title .= $this->getLangStr($admin);
         }
 
@@ -95,7 +93,7 @@ class multisafepay_payafter {
     function generateIcon($icon)
     {
         //return tep_image($icon, '', 60, 23, 'style="float:left;margin-right:10px;"');
-        return tep_image($icon, '', 50, 23, 'style="display:inline-block;vertical-align: middle;height:100%;margin-right:10px;"');  
+        return tep_image($icon, '', 50, 23, 'style="display:inline-block;vertical-align: middle;height:100%;margin-right:10px;"');
     }
 
     /**
@@ -294,7 +292,6 @@ class multisafepay_payafter {
      * 
      * @return boolean
      */
-    
     function output_error()
     {
         return false;
@@ -304,7 +301,6 @@ class multisafepay_payafter {
      * 
      * @return type
      */
-    
     function get_error()
     {
         $error = array(
@@ -314,7 +310,7 @@ class multisafepay_payafter {
 
         return $error;
     }
-    
+
     function _get_error_message($message)
     {
         return $message;
@@ -325,7 +321,6 @@ class multisafepay_payafter {
      * @param type $street_address
      * @return type
      */
-    
     public function parseAddress($street_address)
     {
         $address = $street_address;
@@ -364,7 +359,6 @@ class multisafepay_payafter {
      * @param type $offset
      * @return boolean
      */
-    
     public function rstrpos($haystack, $needle, $offset = null)
     {
         $size = strlen($haystack);
@@ -388,7 +382,6 @@ class multisafepay_payafter {
      * 
      * @return type
      */
-    
     function _start_payafter()
     {
         // generate items list
@@ -419,12 +412,12 @@ class multisafepay_payafter {
         {
             $redirect_url = null;
         }
-        
-        list($street, $housenumber) =   $this->parseAddress($GLOBALS['order']->customer['street_address']);
-        list($del_street, $del_housenumber) =   $this->parseAddress($GLOBALS['order']->delivery['street_address']);
-        
-        $amount                     =   round($GLOBALS['order']->info['total'], 2) * 100;
-        
+
+        list($street, $housenumber) = $this->parseAddress($GLOBALS['order']->customer['street_address']);
+        list($del_street, $del_housenumber) = $this->parseAddress($GLOBALS['order']->delivery['street_address']);
+
+        $amount = round($GLOBALS['order']->info['total'], 2) * 100;
+
         try {
             $order = $this->msp->orders->post(array(
                 "type" => 'redirect',
@@ -437,40 +430,40 @@ class multisafepay_payafter {
                 "var2" => tep_session_id() . ';' . tep_session_name(),
                 "var3" => $GLOBALS['cartID'],
                 "items" => $items_list,
-                "days_active" => MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_DAYS_ACTIVE,                
+                "days_active" => MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_DAYS_ACTIVE,
                 "gateway_info" => array(
-                       "birthday" => null,
-                       "bank_account" => null,
-                       "phone" => $GLOBALS['order']->customer['telephone'],
-                       "email" => $GLOBALS['order']->customer['email_address'],
-                       "gender" => null,
-                       "referrer" => $_SERVER['HTTP_REFERER'],
-                       "user_agent" => $_SERVER['HTTP_USER_AGENT']
-                   ),
-                   "payment_options" => array(
-                       "notification_url" => $this->_href_link('ext/modules/payment/multisafepay/notify_checkout.php?type=initial', '', 'SSL', false, false),
-                       "redirect_url" => $redirect_url,
-                       "cancel_url" => $this->_href_link('shopping_cart.php', '', 'SSL', false, false),
-                       "close_window" => true
-                   ),
-                   "customer" => array(
-                        "locale" => $this->getLocale($GLOBALS['language']),
-                        "ip_address" => $_SERVER['REMOTE_ADDR'],
-                        "forwarded_ip" => $_SERVER['HTTP_FORWARDED'],
-                        "first_name" => $GLOBALS['order']->customer['firstname'],
-                        "last_name" => $GLOBALS['order']->customer['lastname'],
-                        "address1" => $street,
-                        "address2" => null,
-                        "house_number" => $housenumber,
-                        "zip_code" => $GLOBALS['order']->customer['postcode'],
-                        "city" => $GLOBALS['order']->customer['city'],
-                        "state" => $GLOBALS['order']->customer['state'],
-                        "country" => $GLOBALS['order']->customer['country']['iso_code_2'],
-                        "phone" => $GLOBALS['order']->customer['telephone'],
-                        "email" => $GLOBALS['order']->customer['email_address'],
-                        "disable_send_email" => null
-                   ),
-                   "delivery" => array(
+                    "birthday" => null,
+                    "bank_account" => null,
+                    "phone" => $GLOBALS['order']->customer['telephone'],
+                    "email" => $GLOBALS['order']->customer['email_address'],
+                    "gender" => null,
+                    "referrer" => $_SERVER['HTTP_REFERER'],
+                    "user_agent" => $_SERVER['HTTP_USER_AGENT']
+                ),
+                "payment_options" => array(
+                    "notification_url" => $this->_href_link('ext/modules/payment/multisafepay/notify_checkout.php?type=initial', '', 'SSL', false, false),
+                    "redirect_url" => $redirect_url,
+                    "cancel_url" => $this->_href_link('shopping_cart.php', '', 'SSL', false, false),
+                    "close_window" => true
+                ),
+                "customer" => array(
+                    "locale" => $this->getLocale($GLOBALS['language']),
+                    "ip_address" => $_SERVER['REMOTE_ADDR'],
+                    "forwarded_ip" => $_SERVER['HTTP_FORWARDED'],
+                    "first_name" => $GLOBALS['order']->customer['firstname'],
+                    "last_name" => $GLOBALS['order']->customer['lastname'],
+                    "address1" => $street,
+                    "address2" => null,
+                    "house_number" => $housenumber,
+                    "zip_code" => $GLOBALS['order']->customer['postcode'],
+                    "city" => $GLOBALS['order']->customer['city'],
+                    "state" => $GLOBALS['order']->customer['state'],
+                    "country" => $GLOBALS['order']->customer['country']['iso_code_2'],
+                    "phone" => $GLOBALS['order']->customer['telephone'],
+                    "email" => $GLOBALS['order']->customer['email_address'],
+                    "disable_send_email" => null
+                ),
+                "delivery" => array(
                     "first_name" => $GLOBALS['order']->delivery['firstname'],
                     "last_name" => $GLOBALS['order']->delivery['lastname'],
                     "address1" => $del_street,
@@ -493,9 +486,9 @@ class multisafepay_payafter {
                     "shop_version" => PROJECT_VERSION,
                     "plugin_version" => $this->pluginversion,
                     "partner" => "MultiSafepay",
-                ),                
+                ),
             ));
-            
+
             return $this->msp->orders->getPaymentLink();
         } catch (Exception $e) {
             $this->_error_redirect(htmlspecialchars($e->getMessage()));
@@ -506,7 +499,6 @@ class multisafepay_payafter {
      * 
      * @return $shoppingcart_array array
      */
-    
     function getShoppingCart()
     {
         $shoppingcart_array = array();
@@ -556,7 +548,6 @@ class multisafepay_payafter {
      * 
      * @return $checkoutoptions_array array
      */
-    
     function getCheckoutOptions()
     {
         $checkoutoptions_array = array();
@@ -580,7 +571,7 @@ class multisafepay_payafter {
                     )
                 )
             );
-        }    
+        }
 
         foreach ($GLOBALS['order']->products as $product)
         {
@@ -609,7 +600,6 @@ class multisafepay_payafter {
      * @param type $strict
      * @return boolean
      */
-    
     function in_array_recursive($needle, $haystack, $strict = false)
     {
         foreach ($haystack as $item)
@@ -627,7 +617,6 @@ class multisafepay_payafter {
      * @global type $currencies
      * @return type
      */
-    
     function checkout_notify()
     {
         global $currencies;
@@ -812,7 +801,6 @@ class multisafepay_payafter {
      * 
      * @param type $details
      */
-    
     function resume_session($details)
     {
         if (isset($details['transaction']['var2']))
@@ -831,7 +819,6 @@ class multisafepay_payafter {
      * @param type $details
      * @return \type
      */
-    
     function get_customer($details)
     {
         $email = $details['customer']['email'];
@@ -942,18 +929,15 @@ class multisafepay_payafter {
      * @param type $customer_id
      * @return type
      */
-    
     function get_hash($order_id, $customer_id)
     {
         return md5($order_id . $customer_id);
     }
 
-
     /**
      * 
      * @param type $error
      */
-    
     function _error_redirect($error)
     {
         tep_redirect($this->_href_link(FILENAME_SHOPPING_CART, 'payment_error=' . $this->code . '&error=' . $error, 'NONSSL', true, false, false));
@@ -964,7 +948,7 @@ class multisafepay_payafter {
     /*
      * Store the order in the database, and set $this->order_id
      */
-    
+
     function _save_order()
     {
         global $customer_id;
@@ -1176,7 +1160,6 @@ class multisafepay_payafter {
      * @global type $payment
      * @param type $new_order_status
      */
-    
     function _notify_customer($new_order_status = null)
     {
         global $customer_id;
@@ -1356,7 +1339,6 @@ class multisafepay_payafter {
      * @param type $eoln
      * @return string
      */
-    
     function _address_format($address_format_id, $address, $html, $boln, $eoln)
     {
         $address_format_query = tep_db_query("SELECT address_format AS format FROM " . TABLE_ADDRESS_FORMAT . " WHERE address_format_id = '" . (int) $address_format_id . "'");
@@ -1455,7 +1437,6 @@ class multisafepay_payafter {
      * @param type $protected
      * @return type
      */
-    
     function _output_string($string, $translate = false, $protected = false)
     {
         if ($protected == true)
@@ -1478,7 +1459,6 @@ class multisafepay_payafter {
      * @param type $string
      * @return type
      */
-    
     function _output_string_protected($string)
     {
         return $this->_output_string($string, false, true);
@@ -1490,7 +1470,6 @@ class multisafepay_payafter {
      * @param type $parse
      * @return type
      */
-    
     function _parse_input_field_data($data, $parse)
     {
         return strtr(trim($data), $parse);
@@ -1509,7 +1488,6 @@ class multisafepay_payafter {
      * @param type $escape_html
      * @return string
      */
-    
     function _href_link($page = '', $parameters = '', $connection = 'NONSSL', $add_session_id = true, $unused = true, $escape_html = true)
     {
         global $request_type, $session_started, $SID;
@@ -1612,8 +1590,8 @@ class multisafepay_payafter {
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) VALUES ('Payment Zone', 'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '25', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('Sort order of display.', 'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('Daysactive', 'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_DAYS_ACTIVE', '', 'The number of days a paymentlink remains active.', '6', '22', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('Google Analytics', 'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_GA', '', 'Google Analytics Account ID', '6', '22', now())");        
-        
+        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('Google Analytics', 'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_GA', '', 'Google Analytics Account ID', '6', '22', now())");
+
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Initialized Order Status', 'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_ORDER_STATUS_ID_INITIALIZED', 0, 'In progress', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Completed Order Status',   'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_ORDER_STATUS_ID_COMPLETED',   0, 'Completed successfully', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Uncleared Order Status',   'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_ORDER_STATUS_ID_UNCLEARED',   0, 'Not yet cleared', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
@@ -1624,7 +1602,7 @@ class multisafepay_payafter {
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Refunded Order Status',    'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_ORDER_STATUS_ID_REFUNDED',    0, 'Refunded', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Expired Order Status',     'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_ORDER_STATUS_ID_EXPIRED',     0, 'Expired', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Partial Refunded Order Status',     'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_ORDER_STATUS_ID_PARTIAL_REFUNDED',     0, 'Partial Refunded', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('Enable payment method icons', 'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_TITLES_ICON_DISABLED', 'False', 'Enable payment method icons in front of the title', '6', '20', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");        
+        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('Enable payment method icons', 'MODULE_PAYMENT_MULTISAFEPAY_PAYAFTER_TITLES_ICON_DISABLED', 'False', 'Enable payment method icons in front of the title', '6', '20', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
     }
 
     /*
@@ -1671,7 +1649,6 @@ class multisafepay_payafter {
      * @param type $lang
      * @return string
      */
-    
     function getLocale($lang)
     {
         switch ($lang)
@@ -1691,11 +1668,15 @@ class multisafepay_payafter {
             case "english":
                 $lang = 'en_GB';
                 break;
+            case "italian":
+            case "italiano":
+                $lang = 'it_IT';
+                break;
             default:
                 $lang = 'en_GB';
                 break;
         }
-        
+
         return $lang;
     }
 
@@ -1704,7 +1685,6 @@ class multisafepay_payafter {
      * @param type $country
      * @return type
      */
-    
     function getcountry($country)
     {
         if (empty($country))

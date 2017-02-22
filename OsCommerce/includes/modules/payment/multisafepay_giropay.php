@@ -13,13 +13,13 @@ class multisafepay_giropay extends multisafepay {
     function multisafepay_giropay()
     {
         global $order;
+        
         $this->code = 'multisafepay_giropay';
         $this->title = $this->getTitle('Giropay');
         $this->public_title = $this->getTitle('Giropay');
         $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay Giropay</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
         $this->enabled = MODULE_PAYMENT_MSP_GIROPAY_STATUS == 'True';
         $this->sort_order = MODULE_PAYMENT_MSP_GIROPAY_SORT_ORDER;
-
 
         if (is_object($order))
         {
@@ -45,8 +45,7 @@ class multisafepay_giropay extends multisafepay {
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -59,9 +58,13 @@ class multisafepay_giropay extends multisafepay {
         }
     }
 
+    /**
+     * 
+     * @return type
+     */
+    
     function process_button()
     {
-
         return tep_draw_hidden_field('msp_paymentmethod', 'GIROPAY');
     }
 
@@ -76,11 +79,12 @@ class multisafepay_giropay extends multisafepay {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MSP_GIROPAY_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
+        
         return $this->_check;
     }
 
-    /*
-     * Installs the configuration keys into the database
+    /**
+     * Configuration keys
      */
 
     function install()
@@ -90,10 +94,15 @@ class multisafepay_giropay extends multisafepay {
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_MSP_GIROPAY_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '3', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
     }
 
+    /**
+     * 
+     * @return type
+     */
+    
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_GIROPAY_STATUS',
             'MODULE_PAYMENT_MSP_GIROPAY_SORT_ORDER',
             'MODULE_PAYMENT_MSP_GIROPAY_ZONE',

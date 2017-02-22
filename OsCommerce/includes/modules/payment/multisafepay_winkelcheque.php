@@ -13,6 +13,7 @@ class multisafepay_winkelcheque extends multisafepay {
     function multisafepay_winkelcheque()
     {
         global $order;
+        
         $this->code = 'multisafepay_winkelcheque';
         $this->title = $this->getTitle('Winkelcheque');
         $this->public_title = $this->getTitle('Winkelcheque');
@@ -39,14 +40,14 @@ class multisafepay_winkelcheque extends multisafepay {
         {
             $check_flag = false;
             $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_MSP_WINKELCHEQUE_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
+            
             while ($check = tep_db_fetch_array($check_query))
             {
                 if ($check['zone_id'] < 1)
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -59,9 +60,13 @@ class multisafepay_winkelcheque extends multisafepay {
         }
     }
 
+    /**
+     * 
+     * @return type
+     */
+    
     function process_button()
     {
-
         return tep_draw_hidden_field('msp_paymentmethod', 'WINKELCHEQUE');
     }
 
@@ -76,11 +81,12 @@ class multisafepay_winkelcheque extends multisafepay {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MSP_WINKELCHEQUE_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
+        
         return $this->_check;
     }
 
-    /*
-     * Installs the configuration keys into the database
+    /**
+     * Configuration keys
      */
 
     function install()
@@ -90,10 +96,15 @@ class multisafepay_winkelcheque extends multisafepay {
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_MSP_WINKELCHEQUE_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '3', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
     }
 
+    /**
+     * 
+     * @return type
+     */
+    
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_WINKELCHEQUE_STATUS',
             'MODULE_PAYMENT_MSP_WINKELCHEQUE_SORT_ORDER',
             'MODULE_PAYMENT_MSP_WINKELCHEQUE_ZONE',

@@ -13,13 +13,13 @@ class multisafepay_nationaletuinbon extends multisafepay {
     function multisafepay_nationaletuinbon()
     {
         global $order;
+        
         $this->code = 'multisafepay_nationaletuinbon';
         $this->title = $this->getTitle('Nationale Tuinbon');
         $this->public_title = $this->getTitle('Nationale Tuinbon');
         $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay Nationale Tuinbon</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
         $this->enabled = MODULE_PAYMENT_MSP_NATIONALETUINBON_STATUS == 'True';
         $this->sort_order = MODULE_PAYMENT_MSP_NATIONALETUINBON_SORT_ORDER;
-
 
         if (is_object($order))
         {
@@ -45,8 +45,7 @@ class multisafepay_nationaletuinbon extends multisafepay {
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -59,9 +58,13 @@ class multisafepay_nationaletuinbon extends multisafepay {
         }
     }
 
+    /**
+     * 
+     * @return type
+     */
+    
     function process_button()
     {
-
         return tep_draw_hidden_field('msp_paymentmethod', 'NATIONALETUINBON');
     }
 
@@ -76,11 +79,12 @@ class multisafepay_nationaletuinbon extends multisafepay {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MSP_NATIONALETUINBON_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
+        
         return $this->_check;
     }
 
-    /*
-     * Installs the configuration keys into the database
+    /**
+     * Configuration keys
      */
 
     function install()
@@ -93,7 +97,7 @@ class multisafepay_nationaletuinbon extends multisafepay {
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_NATIONALETUINBON_STATUS',
             'MODULE_PAYMENT_MSP_NATIONALETUINBON_SORT_ORDER',
             'MODULE_PAYMENT_MSP_NATIONALETUINBON_ZONE',

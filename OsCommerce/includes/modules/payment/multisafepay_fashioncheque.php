@@ -13,6 +13,7 @@ class multisafepay_fashioncheque extends multisafepay {
     function multisafepay_fashioncheque()
     {
         global $order;
+        
         $this->code = 'multisafepay_fashioncheque';
         $this->title = $this->getTitle('FashionCheque');
         $this->public_title = $this->getTitle('FashionCheque');
@@ -45,8 +46,7 @@ class multisafepay_fashioncheque extends multisafepay {
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -79,8 +79,8 @@ class multisafepay_fashioncheque extends multisafepay {
         return $this->_check;
     }
 
-    /*
-     * Installs the configuration keys into the database
+    /**
+     * Configuration keys
      */
 
     function install()
@@ -93,7 +93,7 @@ class multisafepay_fashioncheque extends multisafepay {
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_FASHIONCHEQUE_STATUS',
             'MODULE_PAYMENT_MSP_FASHIONCHEQUE_SORT_ORDER',
             'MODULE_PAYMENT_MSP_FASHIONCHEQUE_ZONE',

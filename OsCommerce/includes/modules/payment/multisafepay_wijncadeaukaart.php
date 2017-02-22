@@ -13,6 +13,7 @@ class multisafepay_wijncadeaukaart extends multisafepay {
     function multisafepay_wijncadeaukaart()
     {
         global $order;
+        
         $this->code = 'multisafepay_wijncadeaukaart';
         $this->title = $this->getTitle('Wijncadeaukaart');
         $this->public_title = $this->getTitle('Wijncadeaukaart');
@@ -45,8 +46,7 @@ class multisafepay_wijncadeaukaart extends multisafepay {
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -61,7 +61,6 @@ class multisafepay_wijncadeaukaart extends multisafepay {
 
     function process_button()
     {
-
         return tep_draw_hidden_field('msp_paymentmethod', 'WIJNCADEAUKAART');
     }
 
@@ -76,11 +75,12 @@ class multisafepay_wijncadeaukaart extends multisafepay {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MSP_WIJNCADEAUKAART_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
+        
         return $this->_check;
     }
 
-    /*
-     * Installs the configuration keys into the database
+    /**
+     * Configuration keys
      */
 
     function install()
@@ -98,7 +98,7 @@ class multisafepay_wijncadeaukaart extends multisafepay {
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_WIJNCADEAUKAART_STATUS',
             'MODULE_PAYMENT_MSP_WIJNCADEAUKAART_SORT_ORDER',
             'MODULE_PAYMENT_MSP_WIJNCADEAUKAART_ZONE',

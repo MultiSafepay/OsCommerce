@@ -13,6 +13,7 @@ class multisafepay_wellnessgiftcard extends multisafepay {
     function multisafepay_wellnessgiftcard()
     {
         global $order;
+        
         $this->code = 'multisafepay_wellnessgiftcard';
         $this->title = $this->getTitle('Wellness Giftcard');
         $this->public_title = $this->getTitle('Wellness Giftcard');
@@ -45,8 +46,7 @@ class multisafepay_wellnessgiftcard extends multisafepay {
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -63,6 +63,7 @@ class multisafepay_wellnessgiftcard extends multisafepay {
      * 
      * @return type
      */
+    
     function process_button()
     {
 
@@ -80,11 +81,12 @@ class multisafepay_wellnessgiftcard extends multisafepay {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MSP_WELLNESSGIFTCARD_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
+        
         return $this->_check;
     }
 
-    /*
-     * Installs the configuration keys into the database
+    /**
+     * Configuration keys
      */
 
     function install()
@@ -98,10 +100,11 @@ class multisafepay_wellnessgiftcard extends multisafepay {
      * 
      * @return type
      */
+    
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_WELLNESSGIFTCARD_STATUS',
             'MODULE_PAYMENT_MSP_WELLNESSGIFTCARD_SORT_ORDER',
             'MODULE_PAYMENT_MSP_WELLNESSGIFTCARD_ZONE',

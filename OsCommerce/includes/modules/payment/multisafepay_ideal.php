@@ -13,7 +13,8 @@ class multisafepay_ideal extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_ideal() {
+    function multisafepay_ideal() 
+    {
         global $order;
         
         $this->code = 'multisafepay_ideal';
@@ -25,7 +26,9 @@ class multisafepay_ideal extends multisafepay {
 
 
         if (is_object($order))
+        {
             $this->update_status();
+        }
     }
 
     /**
@@ -38,7 +41,8 @@ class multisafepay_ideal extends multisafepay {
      * @return type
      */
     
-    function selection() {
+    function selection()
+    {
         global $customer_id;
         global $languages_id;
         global $order;
@@ -51,6 +55,7 @@ class multisafepay_ideal extends multisafepay {
             'module' => $this->public_title,
             'fields' => array(array('title' => '',
                     'field' => tep_draw_pull_down_menu('msp_issuer', $issuers) . ' ')));
+        
         return $selection;
     }
 
@@ -61,34 +66,39 @@ class multisafepay_ideal extends multisafepay {
     
     function create_iDeal_box() 
     {
-        $msp = new \MultiSafepayAPI\Client();
+        try{
+            $msp = new \MultiSafepayAPI\Client();
 
-        if (MODULE_PAYMENT_MULTISAFEPAY_API_SERVER == 'Live account')
-        {
-            $msp->setApiUrl($this->liveurl);
-        } else
-        {
-            $msp->setApiUrl($this->testurl);
-        }
+            if (MODULE_PAYMENT_MULTISAFEPAY_API_SERVER == 'Live account')
+            {
+                $msp->setApiUrl($this->liveurl);
+            } else
+            {
+                $msp->setApiUrl($this->testurl);
+            }
 
-        $msp->setApiKey(MODULE_PAYMENT_MULTISAFEPAY_API_KEY);
+            $msp->setApiKey(MODULE_PAYMENT_MULTISAFEPAY_API_KEY);
 
-        $iDealIssuers = $msp->issuers->get();
+            $iDealIssuers = $msp->issuers->get();
 
-        $issuers = array();
-        $i = 0;
-        $issuers[$i]['id'] = null;
-        $issuers[$i]['text'] = "Select a bank";
-        $i++;
-
-        foreach ($iDealIssuers as $issuer)
-        {
-            $issuers[$i]['id'] = $issuer->code;
-            $issuers[$i]['text'] = $issuer->description;
+            $issuers = array();
+            $i = 0;
+            $issuers[$i]['id'] = null;
+            $issuers[$i]['text'] = "Select a bank";
             $i++;
-        }
 
-        return $issuers;
+            foreach ($iDealIssuers as $issuer)
+            {
+                $issuers[$i]['id'] = $issuer->code;
+                $issuers[$i]['text'] = $issuer->description;
+                $i++;
+            }
+
+            return $issuers;
+        } catch (Exception $e) {
+            echo htmlspecialchars($e->getMessage());
+            die();
+        }
     }
 
     /*
@@ -149,6 +159,11 @@ class multisafepay_ideal extends multisafepay {
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Direct iDeal', 'MODULE_PAYMENT_MSP_IDEAL_DIRECT', 'True', 'Select the bank within the website?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
     }
 
+    /**
+     * 
+     * @return type
+     */
+    
     function keys() {
         return array
             (
@@ -159,6 +174,11 @@ class multisafepay_ideal extends multisafepay {
         );
     }
 
+    /**
+     * 
+     * @return string
+     */
+    
     function javascript_validation() {
         $js = 'var issuer = document.checkout_payment.msp_issuer.value;';
         $js .= 'if(issuer != 0){';

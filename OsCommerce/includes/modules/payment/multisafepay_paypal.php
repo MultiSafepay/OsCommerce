@@ -13,13 +13,13 @@ class multisafepay_paypal extends multisafepay {
     function multisafepay_paypal()
     {
         global $order;
+        
         $this->code = 'multisafepay_paypal';
         $this->title = $this->getTitle(MODULE_PAYMENT_MSP_PAYPAL_TEXT_TITLE);
         $this->public_title = $this->getTitle(MODULE_PAYMENT_MSP_PAYPAL_TEXT_TITLE);
         $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay PayPal</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";
         $this->enabled = MODULE_PAYMENT_MSP_PAYPAL_STATUS == 'True';
         $this->sort_order = MODULE_PAYMENT_MSP_PAYPAL_SORT_ORDER;
-
 
         if (is_object($order))
         {
@@ -31,6 +31,7 @@ class multisafepay_paypal extends multisafepay {
      * 
      * @global type $order
      */
+    
     function update_status()
     {
         global $order;
@@ -39,14 +40,14 @@ class multisafepay_paypal extends multisafepay {
         {
             $check_flag = false;
             $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_MSP_PAYPAL_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
+            
             while ($check = tep_db_fetch_array($check_query))
             {
                 if ($check['zone_id'] < 1)
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -63,6 +64,7 @@ class multisafepay_paypal extends multisafepay {
      * 
      * @return type
      */
+    
     function process_button()
     {
 
@@ -73,6 +75,7 @@ class multisafepay_paypal extends multisafepay {
      * 
      * @return type
      */
+    
     function check()
     {
         if (!isset($this->_check))
@@ -80,6 +83,7 @@ class multisafepay_paypal extends multisafepay {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MSP_PAYPAL_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
+        
         return $this->_check;
     }
 
@@ -98,10 +102,11 @@ class multisafepay_paypal extends multisafepay {
      * 
      * @return type
      */
+    
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_PAYPAL_STATUS',
             'MODULE_PAYMENT_MSP_PAYPAL_SORT_ORDER',
             'MODULE_PAYMENT_MSP_PAYPAL_ZONE',

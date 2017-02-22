@@ -13,6 +13,7 @@ class multisafepay_fashiongiftcard extends multisafepay {
     function multisafepay_fashiongiftcard()
     {
         global $order;
+        
         $this->code = 'multisafepay_fashiongiftcard';
         $this->title = $this->getTitle('Fashion Giftcard');
         $this->public_title = $this->getTitle('Fashion Giftcard');
@@ -39,14 +40,14 @@ class multisafepay_fashiongiftcard extends multisafepay {
         {
             $check_flag = false;
             $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_MSP_FASHIONGIFTCARD_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
+            
             while ($check = tep_db_fetch_array($check_query))
             {
                 if ($check['zone_id'] < 1)
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -61,7 +62,6 @@ class multisafepay_fashiongiftcard extends multisafepay {
 
     function process_button()
     {
-
         return tep_draw_hidden_field('msp_paymentmethod', 'FASHIONGIFTCARD');
     }
 
@@ -76,11 +76,12 @@ class multisafepay_fashiongiftcard extends multisafepay {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MSP_FASHIONGIFTCARD_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
+        
         return $this->_check;
     }
 
-    /*
-     * Installs the configuration keys into the database
+    /**
+     * Configuration keys
      */
 
     function install()
@@ -93,7 +94,7 @@ class multisafepay_fashiongiftcard extends multisafepay {
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_FASHIONGIFTCARD_STATUS',
             'MODULE_PAYMENT_MSP_FASHIONGIFTCARD_SORT_ORDER',
             'MODULE_PAYMENT_MSP_FASHIONGIFTCARD_ZONE',

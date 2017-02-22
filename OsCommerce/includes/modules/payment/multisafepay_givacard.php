@@ -13,6 +13,7 @@ class multisafepay_givacard extends multisafepay {
     function multisafepay_givacard()
     {
         global $order;
+        
         $this->code = 'multisafepay_givacard';
         $this->title = $this->getTitle('Givacard');
         $this->public_title = $this->getTitle('Givacard');
@@ -45,8 +46,7 @@ class multisafepay_givacard extends multisafepay {
                 {
                     $check_flag = true;
                     break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id'])
-                {
+                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
                     $check_flag = true;
                     break;
                 }
@@ -61,7 +61,6 @@ class multisafepay_givacard extends multisafepay {
 
     function process_button()
     {
-
         return tep_draw_hidden_field('msp_paymentmethod', 'GIVACARD');
     }
 
@@ -76,11 +75,12 @@ class multisafepay_givacard extends multisafepay {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_MSP_GIVACARD_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
+        
         return $this->_check;
     }
 
-    /*
-     * Installs the configuration keys into the database
+    /**
+     * Configuration keys
      */
 
     function install()
@@ -90,10 +90,15 @@ class multisafepay_givacard extends multisafepay {
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_MSP_GIVACARD_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '3', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
     }
 
+    /**
+     * 
+     * @return type
+     */
+    
     function keys()
     {
         return array
-            (
+        (
             'MODULE_PAYMENT_MSP_GIVACARD_STATUS',
             'MODULE_PAYMENT_MSP_GIVACARD_SORT_ORDER',
             'MODULE_PAYMENT_MSP_GIVACARD_ZONE',

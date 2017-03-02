@@ -214,7 +214,7 @@ class multisafepay_klarna {
     {
         return false;
     }
-
+           
     /*
      * Outputs the payment method title/text and if required, the input fields
      */
@@ -230,7 +230,7 @@ class multisafepay_klarna {
         // check if transaction is possible
         //Not needed obviously?
         //Previously: if(empty($this->api_url)... / $this->api_url has already been removed.
-        if (empty($this->liveurl || $this->testurl))
+        if (empty($this->liveurl) || empty($this->testurl))
         {
             return;
         }

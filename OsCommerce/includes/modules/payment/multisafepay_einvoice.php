@@ -226,7 +226,7 @@ class multisafepay_einvoice {
         global $order_totals;
         global $order_products_id;
 
-        if (empty($this->liveurl || $this->testurl))
+        if (empty($this->liveurl) || empty($this->testurl))
         {
             return;
         }

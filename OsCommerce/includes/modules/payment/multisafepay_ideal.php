@@ -51,11 +51,23 @@ class multisafepay_ideal extends multisafepay {
 
         $issuers = $this->create_iDeal_box();
 
-        $selection = array('id' => $this->code,
-            'module' => $this->public_title,
-            'fields' => array(array('title' => '',
-                    'field' => tep_draw_pull_down_menu('msp_issuer', $issuers) . ' ')));
         
+        if(MODULE_PAYMENT_MSP_IDEAL_DIRECT == 'True')
+        {
+            $selection = array(
+                'id' => $this->code,
+                'module' => $this->public_title,
+                'fields' => array(array('title' => '',
+                'field' => tep_draw_pull_down_menu('msp_issuer', $issuers) . ' '))
+            );
+        } else {
+            $selection = array(
+                'id' => $this->code,
+                'module' => $this->public_title,
+                'fields' => array(array('title' => ''))
+            );
+        }
+
         return $selection;
     }
 

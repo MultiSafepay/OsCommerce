@@ -10,7 +10,7 @@ class multisafepay_giropay extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_giropay()
+    function __construct()
     {
         global $order;
         

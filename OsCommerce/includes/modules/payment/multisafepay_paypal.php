@@ -10,7 +10,7 @@ class multisafepay_paypal extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_paypal()
+    function __construct()
     {
         global $order;
         

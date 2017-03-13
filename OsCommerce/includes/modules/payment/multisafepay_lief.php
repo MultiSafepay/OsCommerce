@@ -10,7 +10,7 @@ class multisafepay_lief extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_lief()
+    function __construct()
     {
         global $order;
         

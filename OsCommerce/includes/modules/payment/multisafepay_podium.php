@@ -10,7 +10,7 @@ class multisafepay_podium extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_podium()
+    function __construct()
     {
         global $order;
         

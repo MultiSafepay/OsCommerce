@@ -10,7 +10,7 @@ class multisafepay_nationaletuinbon extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_nationaletuinbon()
+    function __construct()
     {
         global $order;
         

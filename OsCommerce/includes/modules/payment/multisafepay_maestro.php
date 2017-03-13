@@ -10,7 +10,7 @@ class multisafepay_maestro extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_maestro()
+    function __construct()
     {
         global $order;
         

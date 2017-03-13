@@ -10,7 +10,7 @@ class multisafepay_wellnessgiftcard extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_wellnessgiftcard()
+    function __construct()
     {
         global $order;
         

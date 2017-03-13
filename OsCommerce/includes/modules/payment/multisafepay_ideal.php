@@ -13,7 +13,7 @@ class multisafepay_ideal extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_ideal() 
+    function __construct() 
     {
         global $order;
         

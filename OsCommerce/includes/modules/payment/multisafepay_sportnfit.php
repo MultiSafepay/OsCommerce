@@ -10,7 +10,7 @@ class multisafepay_sportnfit extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_sportnfit()
+    function __construct()
     {
         global $order;
         

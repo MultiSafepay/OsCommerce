@@ -10,7 +10,7 @@ class multisafepay_mastercard extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_mastercard()
+    function __construct()
     {
         global $order;
         

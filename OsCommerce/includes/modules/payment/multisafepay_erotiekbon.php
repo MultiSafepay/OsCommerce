@@ -10,7 +10,7 @@ class multisafepay_erotiekbon extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_erotiekbon()
+    function __construct()
     {
         global $order;
         

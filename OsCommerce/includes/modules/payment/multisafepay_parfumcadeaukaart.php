@@ -10,7 +10,7 @@ class multisafepay_parfumcadeaukaart extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_parfumcadeaukaart()
+    function __construct()
     {
         global $order;
         

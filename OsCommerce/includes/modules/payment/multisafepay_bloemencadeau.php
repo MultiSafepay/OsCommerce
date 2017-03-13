@@ -10,7 +10,7 @@ class multisafepay_bloemencadeau extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_bloemencadeau()
+    function __construct()
     {
         global $order;
         $this->code = 'multisafepay_bloemencadeau';

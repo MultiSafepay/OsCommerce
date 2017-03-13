@@ -10,7 +10,7 @@ class multisafepay_ferbuy extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_ferbuy()
+    function __construct()
     {
         global $order;
         

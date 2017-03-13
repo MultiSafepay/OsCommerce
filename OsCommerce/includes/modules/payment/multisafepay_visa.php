@@ -10,7 +10,7 @@ class multisafepay_visa extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_visa()
+    function __construct()
     {
         global $order;
         

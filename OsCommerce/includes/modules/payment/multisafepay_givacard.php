@@ -10,7 +10,7 @@ class multisafepay_givacard extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_givacard()
+    function __construct()
     {
         global $order;
         

@@ -10,7 +10,7 @@ class multisafepay_webshopgiftcard extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_webshopgiftcard()
+    function __construct()
     {
         global $order;
         

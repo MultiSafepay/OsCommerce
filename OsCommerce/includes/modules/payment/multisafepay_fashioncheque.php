@@ -10,7 +10,7 @@ class multisafepay_fashioncheque extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_fashioncheque()
+    function __construct()
     {
         global $order;
         

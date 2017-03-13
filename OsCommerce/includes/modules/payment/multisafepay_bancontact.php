@@ -10,7 +10,7 @@ class multisafepay_bancontact extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_bancontact()
+    function __construct()
     {
         global $order;
         

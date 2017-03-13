@@ -10,7 +10,7 @@ class multisafepay_beautyandwellness extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_beautyandwellness()
+    function __construct()
     {
         global $order;
         

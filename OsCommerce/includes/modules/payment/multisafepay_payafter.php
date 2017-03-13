@@ -28,7 +28,7 @@ class multisafepay_payafter {
      * @global type $order
      * @param type $order_id
      */
-    function multisafepay_payafter($order_id = -1)
+    function __construct($order_id = -1)
     {
         global $order;
 

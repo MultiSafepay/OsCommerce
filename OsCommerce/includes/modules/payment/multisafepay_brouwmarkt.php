@@ -10,7 +10,7 @@ class multisafepay_brouwmarkt extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_brouwmarkt()
+    function __construct()
     {
         global $order;
         $this->code = 'multisafepay_brouwmarkt';

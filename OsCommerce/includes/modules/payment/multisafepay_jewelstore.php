@@ -10,7 +10,7 @@ class multisafepay_jewelstore extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_jewelstore()
+    function __construct()
     {
         global $order;
         

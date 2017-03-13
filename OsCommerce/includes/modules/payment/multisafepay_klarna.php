@@ -28,7 +28,7 @@ class multisafepay_klarna {
      * @param type $order_id
      */
 
-    function multisafepay_klarna($order_id = -1)
+    function __construct($order_id = -1)
     {
         global $order;
 

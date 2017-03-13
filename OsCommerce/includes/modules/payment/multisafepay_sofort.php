@@ -10,7 +10,7 @@ class multisafepay_sofort extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_sofort()
+    function __construct()
     {
         global $order;
         

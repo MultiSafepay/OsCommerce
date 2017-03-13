@@ -10,7 +10,7 @@ class multisafepay_winkelcheque extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_winkelcheque()
+    function __construct()
     {
         global $order;
         

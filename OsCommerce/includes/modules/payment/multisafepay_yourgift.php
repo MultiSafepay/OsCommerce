@@ -10,7 +10,7 @@ class multisafepay_yourgift extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_yourgift()
+    function __construct()
     {
         global $order;
         

@@ -10,7 +10,7 @@ class multisafepay_parfumnl extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_parfumnl()
+    function __construct()
     {
         global $order;
         

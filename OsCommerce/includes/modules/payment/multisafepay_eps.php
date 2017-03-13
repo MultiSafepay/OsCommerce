@@ -10,7 +10,7 @@ class multisafepay_eps extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_eps()
+    function __construct()
     {
         global $order;
         

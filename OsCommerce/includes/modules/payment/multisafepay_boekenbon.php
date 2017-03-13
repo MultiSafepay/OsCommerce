@@ -10,7 +10,7 @@ class multisafepay_boekenbon extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_boekenbon()
+    function __construct()
     {
         global $order;
         $this->code = 'multisafepay_boekenbon';

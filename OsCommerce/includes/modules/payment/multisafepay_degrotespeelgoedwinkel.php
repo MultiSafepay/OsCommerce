@@ -10,7 +10,7 @@ class multisafepay_degrotespeelgoedwinkel extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_degrotespeelgoedwinkel()
+    function __construct()
     {
         global $order;
         

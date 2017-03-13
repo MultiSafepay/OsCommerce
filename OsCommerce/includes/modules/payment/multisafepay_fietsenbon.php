@@ -10,7 +10,7 @@ class multisafepay_fietsenbon extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_fietsenbon()
+    function __construct()
     {
         global $order;
         

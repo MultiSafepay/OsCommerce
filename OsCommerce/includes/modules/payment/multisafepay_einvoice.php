@@ -28,7 +28,7 @@ class multisafepay_einvoice {
      * @global type $order
      * @param type $order_id
      */
-    function multisafepay_einvoice($order_id = -1)
+    function __construct($order_id = -1)
     {
         global $order;
 

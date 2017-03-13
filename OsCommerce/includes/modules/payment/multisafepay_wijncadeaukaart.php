@@ -10,7 +10,7 @@ class multisafepay_wijncadeaukaart extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_wijncadeaukaart()
+    function __construct()
     {
         global $order;
         

@@ -10,7 +10,7 @@ class multisafepay_dirdeb extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_dirdeb()
+    function __construct()
     {
         global $order;
         

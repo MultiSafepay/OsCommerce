@@ -31,7 +31,7 @@ if (!class_exists('multisafepay'))
          * @global type $order
          * @param type $order_id
          */
-        function multisafepay($order_id = -1)
+        function __construct($order_id = -1)
         {
             global $order;
 

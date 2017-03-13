@@ -10,7 +10,7 @@ class multisafepay_gezondheidsbon extends multisafepay {
      * Constructor
      */
 
-    function multisafepay_gezondheidsbon()
+    function __construct()
     {
         global $order;
 

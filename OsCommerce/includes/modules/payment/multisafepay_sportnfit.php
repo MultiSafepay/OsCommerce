@@ -61,7 +61,7 @@ class multisafepay_sportnfit extends multisafepay {
 
     function process_button()
     {
-        return tep_draw_hidden_field('msp_paymentmethod', 'SPORTNFIT');
+        return tep_draw_hidden_field('msp_paymentmethod', 'SPORTENFIT');
     }
 
     /*

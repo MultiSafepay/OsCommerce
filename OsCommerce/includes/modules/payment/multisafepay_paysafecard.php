@@ -67,7 +67,7 @@ class multisafepay_paysafecard extends multisafepay {
     
     function process_button()
     {
-        return tep_draw_hidden_field('msp_paymentmethod', 'PAYSAFECARD');
+        return tep_draw_hidden_field('msp_paymentmethod', 'PSAFECARD');
     }
 
     /*

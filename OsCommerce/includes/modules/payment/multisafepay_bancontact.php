@@ -69,7 +69,7 @@ class multisafepay_bancontact extends multisafepay {
     function process_button()
     {
 
-        return tep_draw_hidden_field('msp_paymentmethod', 'BANCONTACT');
+        return tep_draw_hidden_field('msp_paymentmethod', 'MISTERCASH');
     }
 
     /*

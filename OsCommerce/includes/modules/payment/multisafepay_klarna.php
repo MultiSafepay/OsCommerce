@@ -414,7 +414,7 @@ class multisafepay_klarna {
 
         $this->msp = new \MultiSafepayAPI\Client();
 
-        if (MODULE_PAYMENT_MULTISAFEPAY_KLARNA_API_SERVER == 'Live account')
+        if (MODULE_PAYMENT_MULTISAFEPAY_API_SERVER == 'Live account')
         {
             $this->msp->setApiUrl($this->liveurl);
         } else
@@ -422,12 +422,12 @@ class multisafepay_klarna {
             $this->msp->setApiUrl($this->testurl);
         }
 
-        $this->msp->setApiKey(MODULE_PAYMENT_MULTISAFEPAY_KLARNA_API_KEY);
+        $this->msp->setApiKey(MODULE_PAYMENT_MULTISAFEPAY_API_KEY);
 
         $trans_type = "redirect";
         $daysactive = "30";
 
-        if (MODULE_PAYMENT_MULTISAFEPAY_KLARNA_AUTO_REDIRECT == "True")
+        if (MODULE_PAYMENT_MULTISAFEPAY_AUTO_REDIRECT == "True")
         {
             $redirect_url = $this->_href_link('ext/modules/payment/multisafepay/success.php', '', 'SSL', false, false);
         } else
@@ -441,7 +441,7 @@ class multisafepay_klarna {
         $amount                     =   round($GLOBALS['order']->info['total'], 2) * 100;
         
         try {
-            $order = $this->msp->orders->post(array(
+            $this->msp->orders->post(array(
                 "type" => $trans_type,
                 "gateway" => 'KLARNA',
                 "order_id" => $this->order_id,
@@ -639,247 +639,6 @@ class multisafepay_klarna {
 
     /**
      * 
-     * @global type $currencies
-     * @return type
-     */
-    
-    function checkout_notify()
-    {
-        global $currencies;
-        $this->order_id = $_GET['transactionid'];
-
-
-        $msp = new MultiSafepayAPI();
-        $msp->plugin_name = $this->plugin_name;
-        $msp->test = (MODULE_PAYMENT_MULTISAFEPAY_KLARNA_API_SERVER != 'Live' && MODULE_PAYMENT_MULTISAFEPAY_KLARNA_API_SERVER != 'Live account');
-        $msp->merchant['account_id'] = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ACCOUNT_ID;
-        $msp->merchant['site_id'] = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_SITE_ID;
-        $msp->merchant['site_code'] = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_SITE_SECURE_CODE;
-        $msp->transaction['id'] = $this->order_id;
-
-        // get status
-        $status = $msp->getStatus();
-
-        if ($msp->error)
-        {
-            echo $msp->error_code . ": " . $msp->error;
-            exit();
-        }
-
-        if (!$msp->details['transaction']['var1'])
-        { // no customer_id, so create a customer
-            //$this->resume_session($msp->details);
-            $customer_id = $this->get_customer($msp->details);
-        } else
-        {
-            //$this->resume_session($msp->details);
-            $customer_id = $msp->details['transaction']['var1'];
-            //tep_session_register('customer_id');
-        }
-
-        $this->_customer_id = $customer_id;
-
-        $customer_country = $this->get_country_from_code($msp->details['customer']['country']);
-        $delivery_country = $this->get_country_from_code($msp->details['customer-delivery']['country']);
-
-        // update customer data in order
-        /* $sql_data_array = array('customers_name' 			=> 	$msp->details['customer']['firstname'] . ' ' . $msp->details['customer']['lastname'],
-          'customers_company' 			=> 	$msp->details['customer']['company'],
-          'customers_street_address' 	=> 	$msp->details['customer']['address1'] . ' ' . $msp->details['customer']['housenumber'],
-          'customers_suburb' 			=> 	'',
-          'customers_city' 				=> 	$msp->details['customer']['city'],
-          'customers_postcode' 			=> 	$msp->details['customer']['zipcode'],
-          'customers_state' 			=> 	$msp->details['customer']['state'],
-          'customers_country' 			=> 	$customer_country['countries_name'],
-          'customers_telephone' 		=> 	$msp->details['customer']['phone1'],
-          'customers_email_address'	 	=> 	$msp->details['customer']['email'],
-          'customers_address_format_id' => 	'1',
-
-          'delivery_name' 				=> 	$msp->details['customer-delivery']['firstname'] . ' ' . $msp->details['customer-delivery']['lastname'],
-          'delivery_company' 			=> 	$msp->details['customer-delivery']['company'],
-          'delivery_street_address' 	=> 	$msp->details['customer-delivery']['address1'] . ' ' . $msp->details['customer-delivery']['housenumber'],
-          'delivery_suburb' 			=> 	'',
-          'delivery_city' 				=> 	$msp->details['customer-delivery']['city'],
-          'delivery_postcode' 			=> 	$msp->details['customer-delivery']['zipcode'],
-          'delivery_state' 				=> 	$msp->details['customer-delivery']['state'],
-          'delivery_country' 			=> 	$delivery_country['countries_name'],
-          'delivery_address_format_id' 	=> 	'1',
-
-          'billing_name' 				=> 	$msp->details['customer']['firstname'] . ' ' . $msp->details['customer']['lastname'],
-          'billing_company' 			=> 	$msp->details['customer']['company'],
-          'billing_street_address' 		=> 	$msp->details['customer']['address1'] . ' ' . $msp->details['customer']['housenumber'],
-          'billing_suburb' 				=> 	'',
-          'billing_city' 				=> 	$msp->details['customer']['city'],
-          'billing_postcode' 			=> 	$msp->details['customer']['zipcode'],
-          'billing_state' 				=> 	$msp->details['customer']['state'],
-          'billing_country' 			=> 	$customer_country['countries_name'],
-          'billing_address_format_id' 	=> 	'1',
-
-          'payment_method' 				=> 	'MultiSafepay fast checkout',
-          //'orders_status' => $order->info['order_status'],
-          // 'currency' => $order->info['currency'],
-          //'currency_value' => $order->info['currency_value']);
-          );
-
-          if ($customer_id)
-          {
-          $sql_data_array['customers_id'] = $customer_id;
-          }
-
-          // create query and update
-          $query = "UPDATE " . TABLE_ORDERS . " SET ";
-          foreach($sql_data_array as $key => $val)
-          {
-          $query 	.= 	$key . " = '" . $val . "',";
-          }
-          $query 		= 	substr($query, 0, -1);
-          $query 		.= 	" WHERE orders_id = '" . $this->order_id . "'";
-          tep_db_query($query);
-
-         */
-        $currency = 'EUR';
-
-        // update order total
-        $value = $msp->details['order-total']['total'];
-        $text = '<b>' . $currencies->format($value, false, 'EUR', $currencies->currencies[$currency]['value']) . '</b>';
-        $query = "UPDATE " . TABLE_ORDERS_TOTAL .
-                " SET value = '" . $value . "', text = '" . $text . "'" .
-                " WHERE class = 'ot_total' AND orders_id = '" . $this->order_id . "'";
-        tep_db_query($query);
-
-        // update tax
-        $value = $msp->details['total-tax']['total'];
-        $text = $currencies->format($value, false, 'EUR', $currencies->currencies[$currency]['value']);
-        $query = "UPDATE " . TABLE_ORDERS_TOTAL .
-                " SET value = '" . $value . "', text = '" . $text . "'" .
-                " WHERE class = 'ot_tax' AND orders_id = '" . $this->order_id . "'";
-        tep_db_query($query);
-
-        // update or add shipping
-        $check_shipping = tep_db_query("SELECT count(1) as count FROM " . TABLE_ORDERS_TOTAL . " WHERE class = 'ot_shipping' AND orders_id = '" . $this->order_id . "'");
-        $check_shipping = tep_db_fetch_array($check_shipping);
-        $check_shipping = $check_shipping['count'];
-
-        $value = $msp->details['shipping']['cost'];
-        $title = $msp->details['shipping']['name'];
-        $text = $currencies->format($value, false, 'EUR', $currencies->currencies[$currency]['value']);
-        if ($check_shipping)
-        {
-            $query = "UPDATE " . TABLE_ORDERS_TOTAL .
-                    " SET title = '" . $title . "', value = '" . $value . "', text = '" . $text . "'" .
-                    " WHERE class = 'ot_shipping' AND orders_id = '" . $this->order_id . "'";
-            tep_db_query($query);
-        } else
-        {
-            $query = "INSERT INTO " . TABLE_ORDERS_TOTAL .
-                    "(orders_id, title, text, value, class, sort_order)" .
-                    " VALUES ('" . $this->order_id . "','" . $title . "','" . $text . "','" . $value . "','ot_shipping','2')";
-            tep_db_query($query);
-        }
-
-        // current order status
-        $current_order = tep_db_query("SELECT orders_status FROM " . TABLE_ORDERS . " WHERE orders_id = " . $this->order_id);
-        $current_order = tep_db_fetch_array($current_order);
-        $old_order_status = $current_order['orders_status'];
-
-        //$status = "completed";
-        //determine new osCommerce order status
-        $reset_cart = false;
-        $notify_customer = false;
-        $new_order_status = null;
-
-        switch ($status)
-        {
-            case "initialized":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_INITIALIZED;
-                $reset_cart = true;
-                break;
-            case "completed":
-                if ($old_order_status == MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_INITIALIZED || $old_order_status == DEFAULT_ORDERS_STATUS_ID || !$old_order_status)
-                {
-                    $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_COMPLETED;
-                    $reset_cart = true;
-                    //$notify_customer = ($old_order_status != $new_order_status);
-                    $notify_customer = true;
-                }
-                break;
-            case "uncleared":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_UNCLEARED;
-                break;
-            case "reserved":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_RESERVED;
-                break;
-            case "void":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_VOID;
-                break;
-            case "declined":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_DECLINED;
-                break;
-            case "reversed":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_REVERSED;
-                break;
-            case "refunded":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_REFUNDED;
-                break;
-            case "refunded":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_PARTIAL_REFUNDED;
-                break;
-            case "expired":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_EXPIRED;
-                break;
-            case "cancelled":
-                $new_order_status = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_VOID;
-                break;
-            default:
-                $new_order_status = DEFAULT_ORDERS_STATUS_ID;
-        }
-
-        $GLOBALS['order']->info['order_status'] = $new_order_status;
-
-        // update order with new status if needed
-        if ($new_order_status)
-        {
-            $order_status_query = tep_db_query("SELECT orders_status_name FROM " . TABLE_ORDERS_STATUS . " WHERE orders_status_id = '" . $new_order_status . "' AND language_id = '" . $GLOBALS['languages_id'] . "'");
-            $order_status = tep_db_fetch_array($order_status_query);
-            $GLOBALS['order']->info['orders_status'] = $order_status['orders_status_name'];
-
-            // update order
-            tep_db_query("UPDATE " . TABLE_ORDERS . " SET orders_status = '" . $new_order_status . "' WHERE orders_id = " . $this->order_id);
-        }
-
-        // reload the order and totals
-        $GLOBALS['order'] = new order($this->order_id);
-        $GLOBALS['order_totals'] = $GLOBALS['order']->totals;
-
-        // notify customer, or just add note to history
-        if ($notify_customer)
-        {
-            $this->_notify_customer($new_order_status);
-        } else
-        {
-            if ($new_order_status && $old_order_status != $new_order_status)
-            {
-                $sql_data_array = array('orders_id' => $this->order_id,
-                    'orders_status_id' => $new_order_status,
-                    'date_added' => 'now()',
-                    'customer_notified' => 0,
-                    'comments' => '');
-                tep_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
-            }
-        }
-
-        // reset cart
-        if ($reset_cart)
-        {
-            //tep_db_query("DELETE FROM " . TABLE_CUSTOMERS_BASKET . " WHERE customers_id = '" . (int)$GLOBALS['order']->customer['id'] . "'");
-            //tep_db_query("DELETE FROM " . TABLE_CUSTOMERS_BASKET_ATTRIBUTES . " WHERE customers_id = '" . (int)$GLOBALS['order']->customer['id'] . "'");
-        }
-        //print_r($msp->details);
-        return $status;
-    }
-
-    /**
-     * 
      * @param type $details
      */
     
@@ -898,107 +657,10 @@ class multisafepay_klarna {
 
     /**
      * 
-     * @param type $details
-     * @return \type
-     */
-    
-    function get_customer($details)
-    {
-        $email = $details['customer']['email'];
-        $customer_exists = tep_db_fetch_array(tep_db_query("select customers_id from " .
-                        TABLE_CUSTOMERS . " where customers_email_address = '" . $email . "'"));
-
-        $new_user = false;
-        if ($customer_exists['customers_id'] != '')
-        {
-            $customer_id = $customer_exists['customers_id'];
-            //tep_session_register('customer_id');
-        } else
-        {
-            $sql_data_array = array(
-                'customers_firstname' => $details['customer']['firstname'],
-                'customers_lastname' => $details['customer']['lastname'],
-                'customers_email_address' => $details['customer']['email'],
-                'customers_telephone' => $details['customer']['phone1'],
-                'customers_fax' => '',
-                'customers_default_address_id' => 0,
-                'customers_password' => tep_encrypt_password('test123'),
-                'customers_newsletter' => 1
-            );
-            if (ACCOUNT_DOB == 'true')
-            {
-                $sql_data_array['customers_dob'] = 'now()';
-            }
-            tep_db_perform(TABLE_CUSTOMERS, $sql_data_array);
-            $customer_id = tep_db_insert_id();
-            //tep_session_register('customer_id');
-            tep_db_query("insert into " . TABLE_CUSTOMERS_INFO . "
-                                    (customers_info_id, customers_info_number_of_logons,
-                                     customers_info_date_account_created)
-                               values ('" . (int) $customer_id . "', '0', now())");
-
-            $new_user = true;
-        }
-
-        //      The user exists and is logged in
-        //      Check database to see if the address exist.
-        $address_book = tep_db_query("select address_book_id, entry_country_id, entry_zone_id from " . TABLE_ADDRESS_BOOK . "
-										where  customers_id = '" . $customer_id . "'
-										and entry_street_address = '" . $details['customer']['address1'] . ' ' . $details['customer']['housenumber'] . "'
-										and entry_suburb = '" . '' . "'
-										and entry_postcode = '" . $details['customer']['zipcode'] . "'
-										and entry_city = '" . $details['customer']['city'] . "'
-									");
-
-        //      If not, add the addr as default one
-        if (!tep_db_num_rows($address_book))
-        {
-            $country = $this->get_country_from_code($details['customer']['country']);
-
-            $sql_data_array = array(
-                'customers_id' => $customer_id,
-                'entry_gender' => '',
-                'entry_company' => '',
-                'entry_firstname' => $details['customer']['firstname'],
-                'entry_lastname' => $details['customer']['lastname'],
-                'entry_street_address' => $details['customer']['address1'] . ' ' . $details['customer']['housenumber'],
-                'entry_suburb' => '',
-                'entry_postcode' => $details['customer']['zipcode'],
-                'entry_city' => $details['customer']['city'],
-                'entry_state' => '',
-                'entry_country_id' => $country['countries_id'],
-                'entry_zone_id' => ''
-            );
-            tep_db_perform(TABLE_ADDRESS_BOOK, $sql_data_array);
-
-            $address_id = tep_db_insert_id();
-            tep_db_query("update " . TABLE_CUSTOMERS . "
-                                set customers_default_address_id = '" . (int) $address_id . "'
-                                where customers_id = '" . (int) $customer_id . "'");
-            $customer_default_address_id = $address_id;
-            $customer_country_id = $country['countries_id'];
-            //$customer_zone_id = $zone_answer['zone_id'];
-        } else
-        {
-            $customer_default_address_id = $address_book['address_book_id'];
-            $customer_country_id = $address_book['entry_country_id'];
-            //$customer_zone_id = $address_book['entry_zone_id'];
-        }
-        $customer_first_name = $details['customer']['firstname'];
-        //tep_session_register('customer_default_address_id');
-        //tep_session_register('customer_country_id');
-        //tep_session_register('customer_zone_id');
-        //tep_session_register('customer_first_name');
-
-        return $customer_id;
-        //  Customer exists, is logged and address book is up to date
-    }
-
-    /**
-     * 
      * @param type $code
      * @return type
      */
+    
     function get_country_from_code($code)
     {
         //countries_iso_code_2
@@ -1149,8 +811,7 @@ class multisafepay_klarna {
                     if ((DOWNLOAD_ENABLED != 'true') || (!$stock_values['products_attributes_filename']))
                     {
                         $stock_left = $stock_values['products_quantity'] - $order->products[$i]['qty'];
-                    } else
-                    {
+                    } else {
                         $stock_left = $stock_values['products_quantity'];
                     }
                     tep_db_query("update " . TABLE_PRODUCTS . " set products_quantity = '" . $stock_left . "' where products_id = '" . tep_get_prid($order->products[$i]['id']) . "'");
@@ -1670,25 +1331,8 @@ class multisafepay_klarna {
     function install()
     {
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('MultiSafepay enabled', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_STATUS', 'True', 'Enable MultiSafepay payments for this website', '6', '20', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('Account type', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_API_SERVER', 'Live account', '<a href=\'https://testmerchant.multisafepay.com/signup\' target=\'_blank\' style=\'text-decoration: underline; font-weight: bold; color:#696916; \'>Sign up for a free test account!</a>', '6', '21', 'tep_cfg_select_option(array(\'Live account\', \'Test account\'), ', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('API Key', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_API_KEY', '', 'Your MultiSafepay API Key', '6', '22', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('Auto Redirect', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_AUTO_REDIRECT', 'True', 'Enable auto redirect after payment', '6', '20', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) VALUES ('Payment Zone', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '25', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('Sort order of display.', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('Daysactive', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_DAYS_ACTIVE', '', 'The number of days a paymentlink remains active.', '6', '22', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('Google Analytics', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_GA', '', 'Google Analytics Account ID', '6', '22', now())");        
-        
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Initialized Order Status', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_INITIALIZED', 0, 'In progress', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Completed Order Status',   'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_COMPLETED',   0, 'Completed successfully', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Uncleared Order Status',   'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_UNCLEARED',   0, 'Not yet cleared', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Reserved Order Status',    'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_RESERVED',    0, 'Reserved', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Voided Order Status',      'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_VOID',        0, 'Cancelled', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Declined Order Status',    'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_DECLINED',    0, 'Declined (e.g. fraud, not enough balance)', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Reversed Order Status',    'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_REVERSED',    0, 'Undone', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Refunded Order Status',    'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_REFUNDED',    0, 'Refunded', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Expired Order Status',     'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_EXPIRED',     0, 'Expired', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('Set Partial Refunded Order Status',     'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_PARTIAL_REFUNDED',     0, 'Partial Refunded', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('Enable payment method icons', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_TITLES_ICON_DISABLED', 'False', 'Enable payment method icons in front of the title', '6', '20', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");        
     }
 
     /*
@@ -1709,24 +1353,8 @@ class multisafepay_klarna {
     {
         return array(
             'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_STATUS',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_API_SERVER',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_API_KEY',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_AUTO_REDIRECT',
             'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ZONE',
             'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_SORT_ORDER',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_DAYS_ACTIVE',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_GA',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_INITIALIZED',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_COMPLETED',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_UNCLEARED',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_RESERVED',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_VOID',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_DECLINED',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_REVERSED',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_REFUNDED',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_EXPIRED',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_PARTIAL_REFUNDED',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_TITLES_ICON_DISABLED',
         );
     }
 

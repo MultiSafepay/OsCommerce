@@ -382,6 +382,7 @@ if (!class_exists('multisafepay'))
          * 
          * @return type
          */
+        
         function check_transaction()
         {
             try {
@@ -410,6 +411,7 @@ if (!class_exists('multisafepay'))
          * @param type $details
          * @return \type
          */
+        
         function get_customer($details)
         {
             $email = $details->customer->email;

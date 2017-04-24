@@ -35,6 +35,7 @@ class multisafepay_klarna {
         $this->code = 'multisafepay_klarna';
         $this->title = $this->getTitle(MODULE_PAYMENT_MULTISAFEPAY_KLARNA_TEXT_TITLE);
         $this->enabled = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_STATUS == 'True';
+        $this->description = $this->description = "<img src='images/icon_info.gif' border='0'>&nbsp;<b>MultiSafepay Klarna</b><BR>The main MultiSafepay module must be installed (does not have to be active) to use this payment method.<BR>";        
         $this->sort_order = MODULE_PAYMENT_MULTISAFEPAY_KLARNA_SORT_ORDER;
         $this->plugin_name = $this->pluginversion . '(' . PROJECT_VERSION . ')';
 
@@ -57,7 +58,7 @@ class multisafepay_klarna {
     function getTitle($admin = 'title')
     {
 
-        if (MODULE_PAYMENT_MULTISAFEPAY_KLARNA_TITLES_ICON_DISABLED != 'False')
+        if (MODULE_PAYMENT_MULTISAFEPAY_TITLES_ICON_DISABLED != 'False')
         {
 
             $title = ($this->checkView() == "checkout") ? $this->generateIcon($this->getIcon()) . " " : "";
@@ -644,14 +645,18 @@ class multisafepay_klarna {
     
     function resume_session($details)
     {
-        if (isset($details['transaction']['var2']))
+        if (isset($details->var2))
         {
-            list ($sess_id, $sess_name) = explode(";", $details['transaction']['var2']);
+            list ($sess_id, $sess_name) = explode(";", $details->var2);
             //If session management is supported by this PHP version
             if (function_exists('session_id'))
+            {
                 session_id($sess_id);
+            }
             if (function_exists('session_name'))
+            {
                 session_name($sess_name);
+            }
         }
     }
 
@@ -1330,9 +1335,9 @@ class multisafepay_klarna {
 
     function install()
     {
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('MultiSafepay enabled', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_STATUS', 'True', 'Enable MultiSafepay payments for this website', '6', '20', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) VALUES ('Payment Zone', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '25', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
+        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) VALUES ('Enable MultiSafepay Klarna Module', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_STATUS', 'True', 'Do you want to accept Klarna payments?', '6', '20', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) VALUES ('Sort order of display.', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0', now())");
+        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) VALUES ('Payment Zone', 'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '25', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");        
     }
 
     /*
@@ -1353,8 +1358,8 @@ class multisafepay_klarna {
     {
         return array(
             'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_STATUS',
-            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ZONE',
             'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_SORT_ORDER',
+            'MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ZONE'            
         );
     }
 

@@ -179,10 +179,10 @@ class multisafepay_einvoice {
     {
         // always disable
         //$this->enabled = false;
-        if ($this->enabled && ((int) MODULE_PAYMENT_MSP_EINVOICE_ZONE > 0))
+        if ($this->enabled && ((int) MODULE_PAYMENT_MULTISAFEPAY_EINVOICE_ZONE > 0))
         {
             $check_flag = false;
-            $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MSP_EINVOICE_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
+            $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MULTISAFEPAY_EINVOICE_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
 
             while ($check = tep_db_fetch_array($check_query))
             {

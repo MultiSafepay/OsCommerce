@@ -394,10 +394,10 @@ class multisafepay_fastcheckout {
 
     function update_status()
     {
-        if ($this->enabled && ((int) MODULE_PAYMENT_MSP_BANKTRANS_ZONE > 0))
+        if ($this->enabled && ((int) MODULE_PAYMENT_MULTISAFEPAY_FCO_ZONE > 0))
         {
             $check_flag = false;
-            $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MSP_BANKTRANS_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
+            $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MULTISAFEPAY_FCO_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
 
             while ($check = tep_db_fetch_array($check_query))
             {
@@ -893,15 +893,10 @@ class multisafepay_fastcheckout {
 
         if (!$details->var1)
         {
-            //No customer_id, so create a customer
-            //$this->resume_session($msp->details);
-            $customer_id = $this->get_customer($details); // Verify?
+            $customer_id = $this->get_customer($details);
         } else
         {
-            //$this->resume_session($msp->details);
             $customer_id = $details->var1;
-            //$this->resume_session($customer_id);
-            //tep_session_register('customer_id');
         }
 
         $this->_customer_id = $customer_id;

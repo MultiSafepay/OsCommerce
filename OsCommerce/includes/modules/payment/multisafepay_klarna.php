@@ -180,10 +180,10 @@ class multisafepay_klarna {
     {
         // always disable
         //$this->enabled = false;
-        if ($this->enabled && ((int) MODULE_PAYMENT_MSP_BANKTRANS_ZONE > 0))
+        if ($this->enabled && ((int) MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ZONE > 0))
         {
             $check_flag = false;
-            $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MSP_BANKTRANS_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
+            $check_query = tep_db_query("SELECT zone_id FROM " . TABLE_ZONES_TO_GEO_ZONES . " WHERE geo_zone_id = '" . MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ZONE . "' AND zone_country_id = '" . $GLOBALS['order']->billing['country']['id'] . "' ORDER BY zone_id");
 
             while ($check = tep_db_fetch_array($check_query))
             {
@@ -640,28 +640,6 @@ class multisafepay_klarna {
 
     /**
      * 
-     * @param type $details
-     */
-    
-    function resume_session($details)
-    {
-        if (isset($details->var2))
-        {
-            list ($sess_id, $sess_name) = explode(";", $details->var2);
-            //If session management is supported by this PHP version
-            if (function_exists('session_id'))
-            {
-                session_id($sess_id);
-            }
-            if (function_exists('session_name'))
-            {
-                session_name($sess_name);
-            }
-        }
-    }
-
-    /**
-     * 
      * @param type $code
      * @return type
      */
@@ -757,7 +735,7 @@ class multisafepay_klarna {
             'cc_number' => $order->info['cc_number'],
             'cc_expires' => $order->info['cc_expires'],
             'date_purchased' => 'now()',
-            'orders_status' => MODULE_PAYMENT_MULTISAFEPAY_KLARNA_ORDER_STATUS_ID_INITIALIZED,
+            'orders_status' => $order->info['order_status'],
             'currency' => $order->info['currency'],
             'currency_value' => $order->info['currency_value'],
             'payment_method' => 'Klarna'
